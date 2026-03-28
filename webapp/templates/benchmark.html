@@ -1,0 +1,484 @@
+{% extends "base.html" %}
+{% block title %}Performance Benchmark — AaaS{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<section class="aaas-hero">
+  <div class="container py-4">
+    <h2 class="fw-bold mb-1">
+      <i class="fa-solid fa-gauge-high me-2"></i>Performance Benchmark
+    </h2>
+    <p class="opacity-75 mb-0">
+      Measure cold-start vs. warm latency, P50/P90/P99 percentiles, throughput,
+      and estimated cost for the Lambda inference endpoint.
+    </p>
+  </div>
+</section>
+
+<!-- ── Main Layout ───────────────────────────────────────────────────────── -->
+<div class="container my-4">
+  <div class="row g-4">
+
+    <!-- LEFT ▸ Config -->
+    <div class="col-lg-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0">
+            <i class="fa-solid fa-sliders text-primary me-2"></i>Test Configuration
+          </h6>
+        </div>
+        <div class="card-body">
+
+          <!-- Requests slider -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Number of Requests</label>
+            <div class="d-flex align-items-center gap-3">
+              <input type="range" class="form-range flex-grow-1"
+                     id="numRequests" min="5" max="50" value="20" step="5">
+              <span class="badge bg-primary fs-6 px-3" id="numRequestsLabel">20</span>
+            </div>
+            <div class="d-flex justify-content-between small text-muted">
+              <span>5</span><span>50</span>
+            </div>
+          </div>
+
+          <!-- Test image preview -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Test Image</label>
+            <div class="d-flex align-items-center gap-3">
+              <img src="/sample-image/glioma/Te-gl_1.jpg"
+                   class="rounded-2 border"
+                   style="width:64px;height:64px;object-fit:cover"
+                   alt="test image">
+              <div>
+                <div class="fw-semibold small">Te-gl_1.jpg</div>
+                <div class="small text-muted">Glioma test image</div>
+                <span class="badge bg-danger mt-1">Glioma</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Endpoint -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Inference Endpoint</label>
+            <div class="small text-break text-muted font-monospace bg-light p-2 rounded-2">
+              {{ api_url }}
+            </div>
+          </div>
+
+          <!-- Architecture -->
+          <div class="mb-4">
+            <label class="form-label fw-semibold">Compute Backend</label>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="badge bg-warning text-dark py-2 px-3">
+                <i class="fa-solid fa-bolt me-1"></i>AWS Lambda
+              </span>
+              <span class="badge bg-secondary py-2 px-3">
+                <i class="fa-brands fa-docker me-1"></i>Container (ECR)
+              </span>
+              <span class="badge bg-dark py-2 px-3">
+                3008 MB RAM
+              </span>
+            </div>
+          </div>
+
+          <button id="runBtn" class="btn btn-primary w-100 btn-lg">
+            <i class="fa-solid fa-play me-2"></i>Run Benchmark
+          </button>
+
+          <div class="alert alert-info border-0 mt-3 mb-0 small">
+            <i class="fa-solid fa-snowflake me-1 text-info"></i>
+            First request = <strong>cold start</strong>.
+            Remaining = <strong>warm</strong> invocations. Requests are sent sequentially.
+          </div>
+        </div>
+      </div>
+
+      <!-- Previous run summary (populated after test) -->
+      <div id="summaryCard" class="card shadow-sm mt-4 d-none">
+        <div class="card-header bg-white py-3">
+          <h6 class="mb-0">
+            <i class="fa-solid fa-table-list text-primary me-2"></i>Summary
+          </h6>
+        </div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <tbody>
+              <tr><th class="ps-3 text-muted fw-normal">Total requests</th><td id="sTotal">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Successful</th>   <td id="sOk">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Errors</th>       <td id="sErr">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Cold start</th>   <td id="sCold">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Warm avg</th>     <td id="sWarmAvg">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Warm min</th>     <td id="sWarmMin">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Warm max</th>     <td id="sWarmMax">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">P50</th>          <td id="sP50">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">P90</th>          <td id="sP90">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">P99</th>          <td id="sP99">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Throughput</th>   <td id="sThroughput">—</td></tr>
+              <tr><th class="ps-3 text-muted fw-normal">Est. cost</th>    <td id="sCost">—</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /col LEFT -->
+
+    <!-- RIGHT ▸ Results -->
+    <div class="col-lg-8">
+
+      <!-- Empty state -->
+      <div id="benchEmpty" class="card shadow-sm h-100 d-flex align-items-center justify-content-center">
+        <div class="card-body text-center py-5">
+          <i class="fa-solid fa-chart-line fa-5x text-muted mb-4" style="opacity:.15"></i>
+          <h5 class="text-muted">No benchmark data</h5>
+          <p class="text-muted small">Configure the test on the left and press <strong>Run Benchmark</strong>.</p>
+        </div>
+      </div>
+
+      <!-- Running state -->
+      <div id="benchRunning" class="card shadow-sm h-100 d-none d-flex align-items-center justify-content-center">
+        <div class="card-body text-center py-5 w-100">
+          <div class="spinner-border text-primary mb-4"
+               style="width:4rem;height:4rem;" role="status">
+            <span class="visually-hidden">Running…</span>
+          </div>
+          <h5 class="bench-pulse">Running benchmark…</h5>
+          <p class="text-muted small">Sending requests to the Lambda endpoint.<br>
+             This may take 15–60 seconds.</p>
+          <div class="progress mt-3 mx-auto" style="max-width:320px;height:8px;">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary"
+                 style="width:100%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results content -->
+      <div id="benchResults" class="d-none">
+
+        <!-- KPI cards -->
+        <div class="row g-3 mb-4">
+          <div class="col-6 col-md-3">
+            <div class="kpi-card kpi-cold">
+              <div class="kpi-label"><i class="fa-solid fa-snowflake me-1"></i>Cold Start</div>
+              <div class="kpi-value" id="kCold">—</div>
+              <div class="kpi-unit">ms</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card kpi-warm">
+              <div class="kpi-label"><i class="fa-solid fa-fire me-1"></i>Warm Avg</div>
+              <div class="kpi-value" id="kWarm">—</div>
+              <div class="kpi-unit">ms</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card kpi-p90">
+              <div class="kpi-label"><i class="fa-solid fa-percent me-1"></i>P90 Latency</div>
+              <div class="kpi-value" id="kP90">—</div>
+              <div class="kpi-unit">ms</div>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-card kpi-cost">
+              <div class="kpi-label"><i class="fa-solid fa-dollar-sign me-1"></i>Est. Cost</div>
+              <div class="kpi-value" id="kCost">—</div>
+              <div class="kpi-unit">USD</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Latency timeline chart -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="fa-solid fa-chart-line text-primary me-2"></i>
+              Latency per Request
+            </h6>
+            <div class="d-flex gap-2 small">
+              <span class="legend-dot" style="background:#f5576c"></span> Cold start
+              <span class="legend-dot ms-2" style="background:#4facfe"></span> Warm
+            </div>
+          </div>
+          <div class="card-body">
+            <canvas id="latencyChart" style="max-height:220px;"></canvas>
+          </div>
+        </div>
+
+        <!-- Distribution + table row -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-header bg-white py-3">
+                <h6 class="mb-0">
+                  <i class="fa-solid fa-chart-bar text-primary me-2"></i>
+                  Latency Distribution
+                </h6>
+              </div>
+              <div class="card-body">
+                <canvas id="distChart" style="max-height:200px;"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+              <div class="card-header bg-white py-3">
+                <h6 class="mb-0">
+                  <i class="fa-solid fa-bullseye text-primary me-2"></i>
+                  Percentile Breakdown
+                </h6>
+              </div>
+              <div class="card-body">
+                <canvas id="pctChart" style="max-height:200px;"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Per-request log -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h6 class="mb-0">
+              <i class="fa-solid fa-list text-primary me-2"></i>Request Log
+            </h6>
+            <button class="btn btn-sm btn-outline-secondary" onclick="exportCSV()">
+              <i class="fa-solid fa-download me-1"></i> Export CSV
+            </button>
+          </div>
+          <div class="card-body p-0" style="max-height:320px;overflow-y:auto;">
+            <table class="table table-sm table-hover mb-0">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th class="ps-3">#</th>
+                  <th>Type</th>
+                  <th>Status</th>
+                  <th>Latency (ms)</th>
+                  <th>Classification</th>
+                  <th>Confidence</th>
+                </tr>
+              </thead>
+              <tbody id="reqLog"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /benchResults -->
+    </div><!-- /col RIGHT -->
+  </div><!-- /row -->
+</div><!-- /container -->
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+let latChartInst = null, distChartInst = null, pctChartInst = null;
+let lastData = null;
+
+// ── Slider label ──────────────────────────────────────────────────────────
+document.getElementById('numRequests').addEventListener('input', function () {
+  document.getElementById('numRequestsLabel').textContent = this.value;
+});
+
+// ── Run Button ───────────────────────────────────────────────────────────
+document.getElementById('runBtn').addEventListener('click', runBenchmark);
+
+async function runBenchmark() {
+  const n = parseInt(document.getElementById('numRequests').value);
+
+  // Switch to running state
+  setSection('running');
+  document.getElementById('runBtn').disabled = true;
+
+  try {
+    const resp = await fetch('/api/benchmark', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ requests: n })
+    });
+    if (!resp.ok) throw new Error('Server error ' + resp.status);
+    const data = await resp.json();
+    lastData = data;
+    renderResults(data);
+    setSection('results');
+  } catch (err) {
+    alert('Benchmark failed: ' + err.message);
+    setSection('empty');
+  } finally {
+    document.getElementById('runBtn').disabled = false;
+  }
+}
+
+function setSection(which) {
+  document.getElementById('benchEmpty').classList.toggle('d-none', which !== 'empty');
+  document.getElementById('benchRunning').classList.toggle('d-none', which !== 'running');
+  document.getElementById('benchResults').classList.toggle('d-none', which !== 'results');
+  document.getElementById('benchEmpty').classList.toggle('d-flex', which === 'empty');
+  document.getElementById('benchRunning').classList.toggle('d-flex', which === 'running');
+  document.getElementById('summaryCard').classList.toggle('d-none', which !== 'results');
+}
+
+// ── Render Results ────────────────────────────────────────────────────────
+function renderResults({ results, stats }) {
+  // KPI cards
+  document.getElementById('kCold').textContent = stats.cold_start_ms;
+  document.getElementById('kWarm').textContent = stats.warm_avg_ms;
+  document.getElementById('kP90').textContent  = stats.p90_ms;
+  document.getElementById('kCost').textContent = '$' + (stats.estimated_cost_usd || 0).toFixed(5);
+
+  // Summary table (left sidebar)
+  document.getElementById('sTotal').textContent     = stats.total;
+  document.getElementById('sOk').innerHTML          = `<span class="text-success fw-semibold">${stats.successful}</span>`;
+  document.getElementById('sErr').innerHTML         = stats.errors > 0
+    ? `<span class="text-danger fw-semibold">${stats.errors}</span>` : stats.errors;
+  document.getElementById('sCold').textContent      = stats.cold_start_ms + ' ms';
+  document.getElementById('sWarmAvg').textContent   = stats.warm_avg_ms  + ' ms';
+  document.getElementById('sWarmMin').textContent   = stats.warm_min_ms  + ' ms';
+  document.getElementById('sWarmMax').textContent   = stats.warm_max_ms  + ' ms';
+  document.getElementById('sP50').textContent       = stats.p50_ms + ' ms';
+  document.getElementById('sP90').textContent       = stats.p90_ms + ' ms';
+  document.getElementById('sP99').textContent       = stats.p99_ms + ' ms';
+  document.getElementById('sThroughput').textContent = stats.throughput + ' req/s';
+  document.getElementById('sCost').textContent      = '$' + (stats.estimated_cost_usd || 0).toFixed(6) + ' USD';
+
+  // Charts
+  renderLatencyChart(results);
+  renderDistChart(stats);
+  renderPctChart(stats);
+
+  // Request log
+  const tbody = document.getElementById('reqLog');
+  tbody.innerHTML = '';
+  results.forEach(r => {
+    const typeBadge = r.is_cold
+      ? `<span class="badge bg-danger" title="Cold start"><i class="fa-solid fa-snowflake me-1"></i>cold</span>`
+      : `<span class="badge bg-secondary"><i class="fa-solid fa-fire me-1"></i>warm</span>`;
+    const statusBadge = r.success
+      ? `<span class="badge bg-success">200 OK</span>`
+      : `<span class="badge bg-danger">${r.status_code || 'ERR'}</span>`;
+    const cls = r.classification
+      ? colorClass(r.classification, r.classification)
+      : `<span class="text-muted">${r.error || '—'}</span>`;
+    const conf = r.confidence != null
+      ? `<div class="d-flex align-items-center gap-1">
+           <div style="width:50px;background:#e9ecef;border-radius:4px;height:6px;overflow:hidden">
+             <div style="width:${Math.round(r.confidence*100)}%;background:#0d6efd;height:100%"></div>
+           </div>
+           <small>${Math.round((r.confidence||0)*100)}%</small></div>`
+      : '—';
+
+    const row = document.createElement('tr');
+    row.innerHTML = `<td class="ps-3">${r.request_num}</td><td>${typeBadge}</td><td>${statusBadge}</td>
+      <td class="fw-semibold ${r.success ? '' : 'text-danger'}">${r.latency_ms}</td>
+      <td>${cls}</td><td>${conf}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+function colorClass(text, cls) {
+  const map = { glioma:'danger', meningioma:'warning', notumor:'success', pituitary:'info' };
+  const dark = cls === 'meningioma' || cls === 'pituitary';
+  return `<span class="badge bg-${map[cls]||'secondary'} ${dark?'text-dark':''}">${text}</span>`;
+}
+
+// ── Charts ────────────────────────────────────────────────────────────────
+function renderLatencyChart(results) {
+  if (latChartInst) latChartInst.destroy();
+  const ctx = document.getElementById('latencyChart').getContext('2d');
+  latChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: results.map(r => '#' + r.request_num),
+      datasets: [{
+        label: 'Latency (ms)',
+        data: results.map(r => r.latency_ms),
+        backgroundColor: results.map(r => r.is_cold ? 'rgba(245,87,108,0.85)' : 'rgba(79,172,254,0.7)'),
+        borderColor:     results.map(r => r.is_cold ? '#f5576c' : '#4facfe'),
+        borderWidth: 1,
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: items => {
+              const i = items[0].dataIndex;
+              return `Req ${results[i].request_num} (${results[i].is_cold ? '❄ cold start' : '🔥 warm'})`;
+            },
+            label: item => `Latency: ${item.raw} ms`
+          }
+        }
+      },
+      scales: {
+        y: { title: { display: true, text: 'Latency (ms)' }, beginAtZero: true },
+        x: { title: { display: true, text: 'Request #' } }
+      }
+    }
+  });
+}
+
+function renderDistChart(stats) {
+  if (distChartInst) distChartInst.destroy();
+  const ctx = document.getElementById('distChart').getContext('2d');
+  distChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Cold', 'Warm Min', 'Warm Avg', 'Warm Max'],
+      datasets: [{
+        label: 'ms',
+        data: [stats.cold_start_ms, stats.warm_min_ms, stats.warm_avg_ms, stats.warm_max_ms],
+        backgroundColor: ['rgba(245,87,108,0.85)','rgba(67,233,123,0.8)','rgba(79,172,254,0.8)','rgba(250,112,154,0.8)'],
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { title: { display: true, text: 'ms' }, beginAtZero: true } }
+    }
+  });
+}
+
+function renderPctChart(stats) {
+  if (pctChartInst) pctChartInst.destroy();
+  const ctx = document.getElementById('pctChart').getContext('2d');
+  pctChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['P50', 'P90', 'P99'],
+      datasets: [{
+        label: 'Latency (ms)',
+        data: [stats.p50_ms, stats.p90_ms, stats.p99_ms],
+        backgroundColor: ['rgba(67,233,123,0.85)','rgba(250,112,154,0.85)','rgba(245,87,108,0.85)'],
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: { y: { title: { display: true, text: 'ms' }, beginAtZero: true } }
+    }
+  });
+}
+
+// ── Export CSV ────────────────────────────────────────────────────────────
+function exportCSV() {
+  if (!lastData) return;
+  const { results, stats } = lastData;
+  let csv = 'Request,Type,Success,StatusCode,Latency_ms,Classification,Confidence\n';
+  results.forEach(r => {
+    csv += `${r.request_num},${r.is_cold ? 'cold' : 'warm'},${r.success},${r.status_code || ''},${r.latency_ms},${r.classification || ''},${r.confidence != null ? (r.confidence * 100).toFixed(1) + '%' : ''}\n`;
+  });
+  csv += '\nMetric,Value\n';
+  Object.entries(stats).forEach(([k, v]) => { csv += `${k},${v}\n`; });
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `aaas_benchmark_${new Date().toISOString().slice(0, 19).replace(/:/g, '-')}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+{% endblock %}

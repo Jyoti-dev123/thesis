@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+venv/
+env/
+.venv/
+
+# Trained models (tracked via Git LFS or uploaded separately to S3)
+model/*.pt
+model/*.pth
+model/*.onnx
+
+# Dataset images (large binary files)
+dataset/
+
+# Terraform state (contains sensitive infra details)
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfplan
+terraform/.terraform.tfstate.lock.info
+
+# IDE / OS artifacts
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+*.swp
+*.swo
+~$*
+
+# Sensitive credentials — NEVER commit
+.env
+*.pem
+*.key
+*_credentials.csv
+*_accessKeys.csv
+login-details.txt
+details.txt

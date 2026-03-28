@@ -1,0 +1,9 @@
+# CPU-only PyTorch for ECS inference container
+# (training uses CUDA locally; inference on Fargate runs on CPU)
+# Install via: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+torch>=2.1.0
+torchvision>=0.16.0
+Pillow>=10.0.0
+boto3>=1.28.0
+flask>=3.0.0
+gunicorn>=21.2.0
