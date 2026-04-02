@@ -5,7 +5,7 @@ resource "aws_apigatewayv2_api" "main" {
 
   cors_configuration {
     allow_headers = ["content-type", "x-api-key"]
-    allow_methods = ["POST", "GET", "OPTIONS"]
+    allow_methods = ["POST", "GET", "DELETE", "OPTIONS"]
     allow_origins = ["*"]
     max_age       = 300
   }
@@ -35,6 +35,36 @@ resource "aws_apigatewayv2_route" "predict" {
 resource "aws_apigatewayv2_route" "health" {
   api_id    = aws_apigatewayv2_api.main.id
   route_key = "GET /health"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
+# ---- Model management routes ----
+
+# GET /models — list all registered model versions
+resource "aws_apigatewayv2_route" "models_list" {
+  api_id    = aws_apigatewayv2_api.main.id
+  route_key = "GET /models"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
+# POST /models — register a new model version
+resource "aws_apigatewayv2_route" "models_register" {
+  api_id    = aws_apigatewayv2_api.main.id
+  route_key = "POST /models"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
+# GET /models/{model_name} — get latest version info
+resource "aws_apigatewayv2_route" "models_get" {
+  api_id    = aws_apigatewayv2_api.main.id
+  route_key = "GET /models/{model_name}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
+}
+
+# DELETE /models/{model_name}/{version} — remove a model version entry
+resource "aws_apigatewayv2_route" "models_delete" {
+  api_id    = aws_apigatewayv2_api.main.id
+  route_key = "DELETE /models/{model_name}/{version}"
   target    = "integrations/${aws_apigatewayv2_integration.lambda_integration.id}"
 }
 
