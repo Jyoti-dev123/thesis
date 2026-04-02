@@ -7,6 +7,7 @@ Run:  python webapp/app.py
 
 import json
 import os
+import random
 import statistics
 import time
 from pathlib import Path
@@ -182,7 +183,9 @@ def sample_image(cls, filename):
 
 @app.route("/benchmark")
 def benchmark():
-    return render_template("benchmark.html", api_url=API_URL)
+    samples = get_sample_images(3)
+    return render_template("benchmark.html", api_url=API_URL,
+                           samples=samples, classes_info=CLASSES_INFO)
 
 
 @app.route("/api/benchmark", methods=["POST"])
@@ -190,24 +193,36 @@ def run_benchmark():
     """Run N sequential requests to the Lambda API and return latency metrics."""
     data = request.get_json() or {}
     n = max(1, min(int(data.get("requests", 20)), 50))  # cap at 50
+    req_cls   = data.get("image_class", "").strip()
+    req_file  = data.get("image_file", "").strip()
 
-    # Find a test image
+    # Resolve the test image ---------------------------------------------------
     test_img_path = None
-    for cls in CLASSES_INFO:
-        candidate = DATASET_DIR / cls / "Te-gl_1.jpg"
+
+    # 1) If the frontend sent a specific class + file, use it
+    if req_cls in CLASSES_INFO and req_file:
+        candidate = DATASET_DIR / req_cls / req_file
         if candidate.exists():
             test_img_path = candidate
-            break
-        files = list((DATASET_DIR / cls).glob("*.jpg"))
-        if files:
-            test_img_path = files[0]
-            break
+
+    # 2) Otherwise pick randomly from all available testing images
+    if test_img_path is None:
+        all_images = []
+        for cls in CLASSES_INFO:
+            cls_dir = DATASET_DIR / cls
+            if cls_dir.exists():
+                all_images.extend(cls_dir.glob("*.jpg"))
+        if all_images:
+            test_img_path = random.choice(all_images)
 
     if test_img_path is None:
         return jsonify({"error": "No test images found in dataset/Testing"}), 500
 
     with open(test_img_path, "rb") as f:
         img_bytes = f.read()
+
+    # Record which image was used so the frontend can display it
+    img_class = test_img_path.parent.name
 
     # Run requests sequentially (preserves cold-start ordering)
     results = []
@@ -245,7 +260,13 @@ def run_benchmark():
     else:
         stats["estimated_cost_usd"] = 0.0
 
-    return jsonify({"results": results, "stats": stats})
+    return jsonify({"results": results, "stats": stats,
+                    "test_image": {"cls": img_class, "file": test_img_path.name}})
+
+
+@app.route("/about")
+def about():
+    return render_template("about.html")
 
 
 @app.route("/api/health")
