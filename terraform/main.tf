@@ -138,3 +138,32 @@ module "ecs" {
   vpc_id            = var.vpc_id
   subnet_ids        = var.subnet_ids
 }
+
+# ---------------------------------------------------------------
+# Module: EC2 (IaaS Docker) — third compute tier
+#
+# Cloud Design Pattern — Pluggable Compute Backend:
+#   Lambda   → event-driven serverless (no infrastructure)
+#   ECS      → managed containers     (no instance management)
+#   EC2      → IaaS with Docker       (full OS control)
+# All three run the same container image from ECR and expose the
+# same /predict + /models API contract.
+# ---------------------------------------------------------------
+module "ec2" {
+  source             = "./modules/ec2"
+  name_prefix        = local.name_prefix
+  region             = local.region
+  account_id         = local.account_id
+  ecr_image_uri      = module.ecr.ecs_image_uri   # reuse the ECS image
+  model_bucket       = module.s3.model_bucket_name
+  model_bucket_arn   = module.s3.model_bucket_arn
+  image_bucket_arn   = module.s3.image_bucket_arn
+  model_key          = var.model_s3_key
+  model_table        = module.dynamodb.table_name
+  dynamodb_table_arn = module.dynamodb.table_arn
+  kms_key_arn        = module.security.kms_key_arn
+  instance_type      = var.ec2_instance_type
+  vpc_id             = var.vpc_id
+  subnet_id          = var.ec2_subnet_id
+  key_pair_name      = var.ec2_key_pair_name
+}
