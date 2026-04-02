@@ -29,7 +29,7 @@ def main():
                         help="DynamoDB table name (terraform output: dynamodb_table_name)")
     parser.add_argument("--bucket",  required=True,
                         help="S3 bucket name containing the model")
-    parser.add_argument("--key",     default="models/brain_tumor_model.h5",
+    parser.add_argument("--key",     default="models/brain_tumor_model.pt",
                         help="S3 object key of the model file")
     parser.add_argument("--name",    default="mri",
                         help="Logical model name used in API requests (e.g. 'mri')")
@@ -47,9 +47,9 @@ def main():
         "storage_path": args.key,
         "bucket":       args.bucket,
         "registered_at": datetime.utcnow().isoformat(),
-        "framework":    "tensorflow",
+        "framework":    "pytorch",
         "classes":      ["glioma", "meningioma", "notumor", "pituitary"],
-        "input_shape":  [224, 224, 3],
+        "input_shape":  [3, 224, 224],
         "image_size":   224,
         "status":       "active",
     }

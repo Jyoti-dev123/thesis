@@ -80,6 +80,8 @@ def main():
     parser.add_argument("--tag",    default="latest", help="Docker image tag")
     parser.add_argument("--region", default=os.environ.get("AWS_REGION", "us-east-1"))
     parser.add_argument("--account-id", default=os.environ.get("AWS_ACCOUNT_ID", ""))
+    parser.add_argument("--lambda-function", default=os.environ.get("LAMBDA_FUNCTION_NAME", "aaas-mri-dev-inference"),
+                        help="Lambda function name to update after push")
     args = parser.parse_args()
 
     region     = args.region
@@ -119,16 +121,27 @@ def main():
     print(f"\nLambda image:  {args.lambda_repo}:{args.tag}")
     print(f"ECS image:     {args.ecs_repo}:{args.tag}")
     print(f"EC2 image:     {ec2_tag}  (same as ECS, re-tagged)")
+
+    # Automatically update Lambda function to use the new image
+    print(f"\n[4/4] Updating Lambda function '{args.lambda_function}' to new image...")
+    lambda_client = boto3.client("lambda", region_name=region)
+    try:
+        resp = lambda_client.update_function_code(
+            FunctionName=args.lambda_function,
+            ImageUri=f"{args.lambda_repo}:{args.tag}",
+        )
+        print(f"  Lambda updated — State: {resp.get('State')}, LastUpdateStatus: {resp.get('LastUpdateStatus')}")
+        print(f"  New image: {resp.get('Code', {}).get('ImageUri', '')}")
+    except Exception as exc:
+        print(f"  WARNING: Lambda update failed: {exc}")
+        print(f"  Run manually:\n    aws lambda update-function-code "
+              f"--function-name {args.lambda_function} "
+              f"--image-uri {args.lambda_repo}:{args.tag} --region {region}")
+
     print(
         "\nTo deploy the new image to EC2, SSH in and run:\n"
         "  sudo systemctl restart aaas-inference\n"
         "(The systemd unit will pull the latest :ec2 image automatically.)"
-    )
-    print(
-        "\nTo update the Lambda function:\n"
-        f"  aws lambda update-function-code \\\n"
-        f"    --function-name <lambda_function_name> \\\n"
-        f"    --image-uri {args.lambda_repo}:{args.tag}"
     )
 
 
