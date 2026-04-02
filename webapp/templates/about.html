@@ -1,0 +1,691 @@
+{% extends "base.html" %}
+{% block title %}About This Project — Cloud Design Patterns{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ──────────────────────────────────────────────────────────────── -->
+<section class="aaas-hero">
+  <div class="container py-5">
+    <div class="row align-items-center">
+      <div class="col-lg-9">
+        <div class="mb-3 d-flex flex-wrap gap-2">
+          <span class="badge rounded-pill bg-primary px-3 py-2">
+            <i class="fa-solid fa-graduation-cap me-1"></i> MSc Thesis
+          </span>
+          <span class="badge rounded-pill bg-secondary px-3 py-2">
+            <i class="fa-brands fa-aws me-1"></i> AWS Cloud
+          </span>
+          <span class="badge rounded-pill px-3 py-2" style="background:#0891b2;">
+            <i class="fa-solid fa-cube me-1"></i> Terraform IaC
+          </span>
+          <span class="badge rounded-pill px-3 py-2" style="background:#1463a5;">
+            <i class="fa-brands fa-docker me-1"></i> Docker
+          </span>
+          <span class="badge rounded-pill px-3 py-2" style="background:#ff6b35;">
+            <i class="fa-solid fa-robot me-1"></i> PyTorch
+          </span>
+        </div>
+        <h1 class="display-4 fw-bold mb-3" style="line-height:1.15;">
+          Design and Implementation of a<br>
+          <span style="color:#60a5fa;">Cloud-Agnostic</span>
+          <em>Analytics as a Service</em><br>
+          Pattern for Medical Image Classification
+        </h1>
+        <p class="lead opacity-75 mb-0">
+          An MSc Thesis exploring <strong>cloud design patterns</strong> —
+          implementing a fully reproducible, cloud-agnostic AaaS architecture
+          on AWS using Terraform, Docker containers, and PyTorch deep learning.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Body ──────────────────────────────────────────────────────────────── -->
+<div class="container my-5">
+
+  <!-- ── Section 1: Thesis Overview ─────────────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-book-open text-primary me-2"></i>Thesis Overview
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        This project is an MSc thesis that investigates how <strong>cloud design
+        patterns</strong> can be applied to build a scalable, provider-agnostic
+        <em>Analytics as a Service (AaaS)</em> system. The chosen domain is
+        medical image classification — specifically the automated detection and
+        categorisation of brain tumors from MRI scans into four classes:
+        <strong>Glioma</strong>, <strong>Meningioma</strong>, <strong>No Tumor</strong>,
+        and <strong>Pituitary</strong>.
+      </p>
+      <p class="fs-5 text-muted mb-4">
+        The thesis follows a five-phase methodology covering system design,
+        environment setup and data preparation, infrastructure and backend
+        development, deployment and performance measurement, and finally
+        critical analysis and documentation. Each phase is fully reproducible:
+        all infrastructure is declared as code using <strong>Terraform</strong>,
+        and all compute workloads are packaged as <strong>Docker</strong>
+        container images, ensuring the system can be ported to any compatible
+        cloud provider with minimal rework.
+      </p>
+      <p class="fs-5 text-muted">
+        The project critically evaluates existing cloud-based machine-learning
+        architectures, identifies their limitations — such as over-reliance on
+        vendor-specific services, lack of portability, and poor lifecycle
+        management — and demonstrates how a cloud-design-pattern approach
+        directly addresses those gaps.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Key Stats row ───────────────────────────────────────────────────── -->
+  <div class="row g-3 mb-5">
+    <div class="col-6 col-md-3">
+      <div class="card text-center shadow-sm border-0 h-100">
+        <div class="card-body py-4">
+          <div class="display-5 fw-bold text-primary mb-1">94.56%</div>
+          <div class="small text-muted">Test-set Accuracy</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center shadow-sm border-0 h-100">
+        <div class="card-body py-4">
+          <div class="display-5 fw-bold text-success mb-1">3</div>
+          <div class="small text-muted">Compute Architectures<br>(Lambda · ECS · EC2)</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center shadow-sm border-0 h-100">
+        <div class="card-body py-4">
+          <div class="display-5 fw-bold text-warning mb-1">9</div>
+          <div class="small text-muted">Terraform Modules</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card text-center shadow-sm border-0 h-100">
+        <div class="card-body py-4">
+          <div class="display-5 fw-bold text-info mb-1">4</div>
+          <div class="small text-muted">Tumor Classes</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 2: Cloud Design Patterns ───────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-diagram-project text-primary me-2"></i>Cloud Design Patterns Applied
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        The central thesis contribution is the identification and application of
+        proven <strong>cloud design patterns</strong> to an analytics workload.
+        Rather than building a monolithic application tightly coupled to a single
+        provider, the system separates concerns into independently deployable,
+        replaceable modules — a pattern known as the
+        <strong>Strangler Fig</strong> or <strong>Backends for Frontends</strong>
+        approach. Each pattern is applied deliberately:
+      </p>
+
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fa-solid fa-bolt text-warning me-2"></i>Serverless / Event-Driven Pattern
+              </h5>
+              <p class="card-text text-muted">
+                AWS Lambda handles inference requests triggered by API Gateway
+                HTTP events. No servers to manage; the function scales from zero
+                to thousands of concurrent executions automatically. The pattern
+                is ideal for bursty, short-lived workloads such as on-demand
+                image classification.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fa-solid fa-layer-group text-primary me-2"></i>Container-Based Microservice Pattern
+              </h5>
+              <p class="card-text text-muted">
+                Both the Lambda function and the ECS Fargate service run
+                <strong>Docker</strong> container images stored in Amazon ECR.
+                Containers encapsulate the entire runtime environment — Python,
+                PyTorch, model weights, and the inference handler — making the
+                workload fully portable and reproducible regardless of the
+                underlying host.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fa-solid fa-server text-success me-2"></i>VM-Based Deployment Pattern
+              </h5>
+              <p class="card-text text-muted">
+                An Amazon EC2 instance (AL2023, t3.medium) running Docker
+                provides a third deployment target, demonstrating that the
+                <em>same Docker image</em> can be deployed across serverless,
+                container-orchestrated, and VM environments — the very essence
+                of cloud-agnostic design.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fa-solid fa-code text-info me-2"></i>Infrastructure as Code Pattern
+              </h5>
+              <p class="card-text text-muted">
+                All AWS resources — API Gateway, Lambda, ECS, EC2, S3, DynamoDB,
+                ECR, IAM, KMS, and Secrets Manager — are provisioned exclusively
+                through <strong>9 modular Terraform configurations</strong>.
+                One command (<code>terraform apply</code>) reproduces the entire
+                production environment from scratch in any AWS region or account.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fa-solid fa-database text-secondary me-2"></i>Model Registry Pattern
+              </h5>
+              <p class="card-text text-muted">
+                Trained model artefacts are stored in Amazon S3 (versioned,
+                KMS-encrypted) and registered in a DynamoDB metadata table with
+                a composite key (<em>model_name + version</em>). Any compute
+                backend resolves the correct artefact at runtime via a
+                <code>GET /models/{name}</code> lookup — decoupling model
+                lifecycle management from inference execution.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card h-100 shadow-sm border-0">
+            <div class="card-body">
+              <h5 class="card-title">
+                <i class="fa-solid fa-shield-halved text-danger me-2"></i>Security by Default Pattern
+              </h5>
+              <p class="card-text text-muted">
+                Every resource applies least-privilege IAM roles, KMS encryption
+                at rest (S3, DynamoDB, CloudWatch Logs), IMDSv2 enforcement on
+                EC2, and secret rotation via AWS Secrets Manager. Security is not
+                bolted on — it is embedded directly in the Terraform modules.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 3: Docker ───────────────────────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-brands fa-docker text-primary me-2"></i>Docker — The Portability Layer
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        <strong>Docker</strong> is the portability backbone of this project.
+        Every compute workload is packaged as a Docker container image, pushed
+        to <strong>Amazon ECR</strong>, and pulled at runtime by whichever
+        deployment target is active. This means the exact same model code, Python
+        environment, and dependencies run identically whether the container is
+        executed by:
+      </p>
+      <ul class="fs-5 text-muted mb-4 ps-3">
+        <li class="mb-2">
+          <strong>AWS Lambda</strong> — using Lambda's container image runtime
+          (up to 10 GB image, 3008 MB RAM).
+        </li>
+        <li class="mb-2">
+          <strong>Amazon ECS Fargate</strong> — a fully managed container
+          orchestration service with auto-scaling.
+        </li>
+        <li>
+          <strong>Amazon EC2</strong> — a t3.medium virtual machine running
+          Docker Engine on Amazon Linux 2023, serving the inference HTTP API
+          directly on port 8080.
+        </li>
+      </ul>
+      <p class="fs-5 text-muted">
+        This three-way deployment approach is the empirical proof of the
+        cloud-agnostic design pattern: the same artefact (Docker image) is
+        consumed by three structurally different compute paradigms without
+        any code change to the inference service itself. The Terraform
+        <code>modules/ecr</code> module manages the image registry, lifecycle
+        policies, and access permissions for both the Lambda and ECS images.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Section 4: Dataset & Model ─────────────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-robot text-primary me-2"></i>Dataset and Deep Learning Model
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        The classification model is trained on the publicly available
+        <strong>Brain Tumor MRI Dataset</strong> (Masoud Nickparvar, Kaggle),
+        which contains pre-split training and testing sets across four classes.
+        A <strong>MobileNetV2</strong> backbone (pre-trained on ImageNet) is
+        fine-tuned using a two-phase transfer-learning strategy in PyTorch:
+      </p>
+      <div class="row g-3 mb-4">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="fw-bold"><i class="fa-solid fa-1 text-primary me-2"></i>Phase 1 — Feature Extraction</h6>
+              <p class="text-muted mb-0">
+                The MobileNetV2 convolutional base is frozen. Only the new
+                classification head is trained for several epochs to learn
+                domain-specific features from MRI image distributions.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm">
+            <div class="card-body">
+              <h6 class="fw-bold"><i class="fa-solid fa-2 text-primary me-2"></i>Phase 2 — Fine-Tuning</h6>
+              <p class="text-muted mb-0">
+                The upper layers of the backbone are unfrozen and trained jointly
+                with the head at a lower learning rate, allowing the model to
+                adapt low-level features to the MRI domain. Final test accuracy:
+                <strong>94.56%</strong>.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="fs-5 text-muted">
+        The trained model is exported in both <strong>PyTorch (.pt)</strong> and
+        <strong>ONNX</strong> formats, uploaded to the S3 model bucket via
+        <code>scripts/upload_model.py</code>, and registered in DynamoDB via
+        <code>scripts/register_model.py</code>. At inference time, any compute
+        backend downloads the <code>.pt</code> file from S3 on cold start, loads
+        it with <code>torch.load()</code>, and serves predictions through a
+        lightweight Flask HTTP API.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── Section 5: Architecture ─────────────────────────────────────────── -->
+  <div class="row mb-5" id="architecture">
+    <div class="col-12">
+      <h2 class="fw-bold mb-3 text-center">
+        <i class="fa-solid fa-sitemap text-primary me-2"></i>System Architecture Diagrams
+      </h2>
+      <p class="text-muted text-center mb-5 fs-5">
+        The following diagrams were generated from PlantUML sources in
+        <code>diagrams/</code> and illustrate the full infrastructure topology
+        and data flows.
+      </p>
+
+      <!-- Overview diagram -->
+      <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-white py-3 d-flex align-items-center gap-2">
+          <i class="fa-solid fa-map text-primary fs-5"></i>
+          <div>
+            <h5 class="mb-0">Overview Architecture</h5>
+            <small class="text-muted">High-level components, patterns, and data flows</small>
+          </div>
+          <a href="{{ url_for('static', filename='img/overview.png') }}"
+             target="_blank" class="btn btn-sm btn-outline-secondary ms-auto">
+            <i class="fa-solid fa-expand me-1"></i>Full Size
+          </a>
+        </div>
+        <div class="card-body p-3 text-center overflow-auto">
+          <img src="{{ url_for('static', filename='img/overview.png') }}"
+               alt="Overview Architecture Diagram"
+               class="img-fluid rounded"
+               style="max-width:100%;cursor:zoom-in;"
+               onclick="openLightbox(this.src, 'Overview Architecture')">
+        </div>
+      </div>
+
+      <!-- Detailed diagram -->
+      <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 d-flex align-items-center gap-2">
+          <i class="fa-solid fa-microscope text-primary fs-5"></i>
+          <div>
+            <h5 class="mb-0">Detailed Infrastructure Map</h5>
+            <small class="text-muted">All AWS resources, IDs, endpoints, and security layers</small>
+          </div>
+          <a href="{{ url_for('static', filename='img/detailed.png') }}"
+             target="_blank" class="btn btn-sm btn-outline-secondary ms-auto">
+            <i class="fa-solid fa-expand me-1"></i>Full Size
+          </a>
+        </div>
+        <div class="card-body p-3 text-center overflow-auto">
+          <img src="{{ url_for('static', filename='img/detailed.png') }}"
+               alt="Detailed Infrastructure Diagram"
+               class="img-fluid rounded"
+               style="max-width:100%;cursor:zoom-in;"
+               onclick="openLightbox(this.src, 'Detailed Infrastructure Map')">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 6: Infrastructure ──────────────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-cube text-primary me-2"></i>Terraform Infrastructure as Code
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        All cloud resources are provisioned through <strong>9 Terraform modules</strong>.
+        Each module is independently testable and reusable. The root
+        <code>main.tf</code> wires them together via explicit input/output
+        variables, ensuring no implicit dependencies exist between modules.
+      </p>
+
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Module</th>
+              <th>Resources Provisioned</th>
+              <th>Design Pattern</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>modules/api_gateway</code></td>
+              <td>HTTP API, stage (dev), routes, Lambda integration</td>
+              <td><span class="badge bg-warning text-dark">API Gateway</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/lambda</code></td>
+              <td>Lambda function (container), CloudWatch logs, env vars</td>
+              <td><span class="badge bg-danger">Serverless</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/ecs</code></td>
+              <td>ECS cluster, Fargate task, service, ALB, target group</td>
+              <td><span class="badge bg-primary">Container Orchestration</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/ec2</code></td>
+              <td>EC2 instance (AL2023, t3.medium), SG, IAM role &amp; profile</td>
+              <td><span class="badge bg-success">VM Deployment</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/s3</code></td>
+              <td>Model bucket (versioned), image bucket, lifecycle policies</td>
+              <td><span class="badge bg-secondary">Object Storage</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/dynamodb</code></td>
+              <td>Model metadata table (model_name + version composite key)</td>
+              <td><span class="badge bg-info text-dark">Model Registry</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/ecr</code></td>
+              <td>Docker image repositories (Lambda + ECS), lifecycle policies</td>
+              <td><span class="badge" style="background:#1463a5;">Container Registry</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/iam</code></td>
+              <td>Execution roles and least-privilege inline policies</td>
+              <td><span class="badge bg-dark">Zero-Trust Security</span></td>
+            </tr>
+            <tr>
+              <td><code>modules/security</code></td>
+              <td>KMS customer-managed key, Secrets Manager</td>
+              <td><span class="badge bg-danger">Encryption at Rest</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 7: Live Deployed Infrastructure ───────────────────────── -->
+  <div class="row mb-5" id="infrastructure">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-network-wired text-primary me-2"></i>Live Deployed Infrastructure
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        The following table enumerates every AWS resource provisioned for this
+        thesis deployment. All values are real — they reflect the active
+        environment created by <code>terraform apply</code> in region
+        <strong>us-east-1</strong>. These identifiers can be used to verify,
+        reproduce, or extend the system at any time.
+      </p>
+
+      <!-- API Gateway -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-signs-post me-2"></i>API Gateway (HTTP API v2)
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Base URL</td><td><code>https://whaveg4pu8.execute-api.us-east-1.amazonaws.com/dev</code></td></tr>
+            <tr><td>Predict Endpoint</td><td><code>https://whaveg4pu8.execute-api.us-east-1.amazonaws.com/dev/predict</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Lambda -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-bolt me-2"></i>AWS Lambda (Serverless Compute)
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Function Name</td><td><code>aaas-mri-dev-inference</code></td></tr>
+            <tr><td>ECR Image Repository</td><td><code>069835412283.dkr.ecr.us-east-1.amazonaws.com/aaas-mri-dev-lambda-inference</code></td></tr>
+            <tr><td>Runtime</td><td>Docker Container Image (PyTorch MobileNetV2)</td></tr>
+            <tr><td>Memory</td><td>3008 MB</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ECS -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-layer-group me-2"></i>Amazon ECS Fargate (Container Orchestration)
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Service Name</td><td><code>aaas-mri-dev-inference-service</code></td></tr>
+            <tr><td>ECR Image Repository</td><td><code>069835412283.dkr.ecr.us-east-1.amazonaws.com/aaas-mri-dev-ecs-inference</code></td></tr>
+            <tr><td>Launch Type</td><td>Fargate (serverless containers)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- EC2 -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-server me-2"></i>Amazon EC2 (VM-Based Deployment)
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Instance ID</td><td><code>i-0832e29292f2e42a8</code></td></tr>
+            <tr><td>Public IP</td><td><code>98.92.207.44</code></td></tr>
+            <tr><td>Instance Type</td><td>t3.medium — Amazon Linux 2023</td></tr>
+            <tr><td>Inference Endpoint</td><td><code>http://ec2-98-92-207-44.compute-1.amazonaws.com:8080/predict</code></td></tr>
+            <tr><td>Models Endpoint</td><td><code>http://ec2-98-92-207-44.compute-1.amazonaws.com:8080/models</code></td></tr>
+            <tr><td>Root Volume</td><td>30 GB gp3 (KMS encrypted)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- S3 -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-database me-2"></i>Amazon S3 (Object Storage)
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Model Bucket</td><td><code>aaas-mri-dev-models-12c3f89a</code> — versioned, KMS-encrypted, lifecycle archival to GLACIER after 90 days</td></tr>
+            <tr><td>Image Bucket</td><td><code>aaas-mri-dev-images-12c3f89a</code> — uploaded MRI images for inference</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DynamoDB -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-table me-2"></i>Amazon DynamoDB (Model Registry)
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>Table Name</td><td><code>aaas-mri-dev-model-metadata</code></td></tr>
+            <tr><td>Hash Key</td><td><code>model_name</code> (String)</td></tr>
+            <tr><td>Range Key</td><td><code>version</code> (String)</td></tr>
+            <tr><td>Billing Mode</td><td>PAY_PER_REQUEST (on-demand)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Security -->
+      <h5 class="fw-semibold mt-4 mb-3 text-secondary">
+        <i class="fa-solid fa-shield-halved me-2"></i>Security — KMS &amp; Encryption
+      </h5>
+      <div class="table-responsive mb-4">
+        <table class="table table-sm table-hover align-middle">
+          <thead class="table-light"><tr><th style="width:35%">Key</th><th>Value</th></tr></thead>
+          <tbody>
+            <tr><td>KMS Customer-Managed Key ID</td><td><code>010561d9-a0ed-4c4f-99b8-44f504393dd5</code></td></tr>
+            <tr><td>Encrypted Resources</td><td>S3 model bucket, S3 image bucket, DynamoDB table, CloudWatch Logs, EC2 root volume</td></tr>
+            <tr><td>IMDSv2</td><td>Enforced on EC2 (<code>http_tokens = required</code>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Section 9: API ──────────────────────────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-plug text-primary me-2"></i>API Contract
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        The inference API is exposed through <strong>AWS API Gateway</strong>
+        (HTTP API v2) and proxied to the active Lambda backend. The contract
+        is kept minimal and cloud-agnostic:
+      </p>
+
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light">
+              <span class="badge bg-success me-2">POST</span>
+              <code>/predict</code>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small mb-1"><strong>Input:</strong> multipart/form-data</p>
+              <pre class="bg-light p-2 rounded small mb-1">metadata: {"model": "mri"}
+image: &lt;binary JPG/PNG&gt;</pre>
+              <p class="text-muted small mb-1"><strong>Output:</strong></p>
+              <pre class="bg-light p-2 rounded small mb-0">{"classification": "glioma",
+ "confidence": 0.984,
+ "model": "mri"}</pre>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-light">
+              <span class="badge bg-primary me-2">GET</span>
+              <code>/models</code> &nbsp;·&nbsp;
+              <span class="badge bg-success">POST</span>
+              <code>/models</code>
+            </div>
+            <div class="card-body">
+              <p class="text-muted small mb-2">List all registered models or register a new one.</p>
+              <div class="card-header bg-light mt-2 rounded">
+                <span class="badge bg-primary me-2">GET</span>
+                <code>/models/{name}</code>
+              </div>
+              <p class="text-muted small mt-2 mb-2">Retrieve metadata for a specific model.</p>
+              <div class="card-header bg-light rounded">
+                <span class="badge bg-danger me-2">DELETE</span>
+                <code>/models/{name}/{version}</code>
+              </div>
+              <p class="text-muted small mt-2 mb-0">Deregister a specific model version.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Section 10: Reproducibility ─────────────────────────────────────── -->
+  <div class="row mb-5">
+    <div class="col-lg-10 mx-auto">
+      <h2 class="fw-bold mb-3">
+        <i class="fa-solid fa-rotate text-primary me-2"></i>Reproducibility
+      </h2>
+      <p class="fs-5 text-muted mb-4">
+        Full reproducibility was a primary design constraint. Any researcher
+        with valid AWS credentials can recreate the entire system by:
+      </p>
+      <ol class="fs-5 text-muted">
+        <li class="mb-2">Cloning the repository from GitHub.</li>
+        <li class="mb-2">Running <code>model/train_model.py</code> to train the MobileNetV2 classifier.</li>
+        <li class="mb-2">Running <code>scripts/upload_model.py</code> and <code>scripts/register_model.py</code> to publish the model artefact.</li>
+        <li class="mb-2">Running <code>scripts/build_and_push.py</code> to build and push Docker images to ECR.</li>
+        <li class="mb-2">Running <code>terraform apply</code> inside <code>terraform/</code> to provision all AWS resources.</li>
+        <li>Launching the Flask web app with <code>python webapp/app.py</code> to interact with the live API.</li>
+      </ol>
+    </div>
+  </div>
+
+</div><!-- /container -->
+
+<!-- ── Lightbox Modal ─────────────────────────────────────────────────────── -->
+<div class="modal fade" id="lightboxModal" tabindex="-1">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title" id="lightboxTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body text-center p-2">
+        <img id="lightboxImg" src="" alt="diagram" class="img-fluid rounded"
+             style="max-height:85vh;width:auto;">
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function openLightbox(src, title) {
+  document.getElementById('lightboxImg').src = src;
+  document.getElementById('lightboxTitle').textContent = title;
+  new bootstrap.Modal(document.getElementById('lightboxModal')).show();
+}
+</script>
+{% endblock %}
