@@ -1,4 +1,4 @@
-@startuml detailed
+﻿@startuml detailed
 !theme plain
 skinparam backgroundColor #0F172A
 skinparam defaultFontName "Segoe UI"
@@ -27,7 +27,7 @@ skinparam note {
   FontSize 10
 }
 
-title <size:22><color:#F1F5F9><b>AaaS — Detailed Infrastructure Map</b></color></size>\n<size:12><color:#94A3B8>Brain Tumor MRI Classification · AWS us-east-1 · Account 069835412283</color></size>
+title <size:22><color:#F1F5F9><b>Cloud-Agnostic Design Patterns — Detailed Infrastructure Map</b></color></size>\n<size:13><color:#CBD5E1><b>MSc Thesis:</b> Design and Implementation of a Cloud-Agnostic Analytics as a Service Pattern</color></size>\n<size:11><color:#94A3B8>AWS us-east-1 · Account 069835412283 · Containerised with Docker · PyTorch MobileNetV2</color></size>
 
 ' ─────────────────────────────────────────────────────
 '  CLIENT
@@ -42,7 +42,7 @@ rectangle "  <b><color:#F1F5F9>CLIENT</color></b>  " as CLIENT_Z #1E293B/0F172A 
 '  API GATEWAY
 ' ─────────────────────────────────────────────────────
 rectangle "  <b><color:#FED7AA>API GATEWAY</color></b>  " as APIGW_Z #1E293B {
-  component "<b><color:#FB923C>⚡ API Gateway</color></b>\n<size:10><color:#475569>REST · Stage: dev\nPOST /predict\nHTTPS · API Key</color>\n<size:9><color:#FB923C>whaveg4pu8</color>\n<color:#64748B>execute-api.us-east-1.amazonaws.com</color></size>" as APIGW #7C2D12
+  component "<b><color:#FB923C>⚡ API Gateway</color></b>\n<size:10><color:#475569>REST · Stage: dev\nPOST /predict\nGET /models · POST /models\nGET /models/{name}\nDELETE /models/{name}/{ver}\nHTTPS · API Key</color>\n<size:9><color:#FB923C>whaveg4pu8</color>\n<color:#64748B>execute-api.us-east-1.amazonaws.com</color></size>" as APIGW #7C2D12
 
   note right of APIGW
     <color:#94A3B8><b>Endpoint URLs</b></color>
@@ -51,6 +51,10 @@ rectangle "  <b><color:#FED7AA>API GATEWAY</color></b>  " as APIGW_Z #1E293B {
     <color:#F1F5F9>.us-east-1.amazonaws.com/dev</color>
     <color:#FB923C>Predict:</color>
     <color:#F1F5F9>.../dev/predict</color>
+    <color:#FB923C>Models API:</color>
+    <color:#F1F5F9>GET/POST .../dev/models</color>
+    <color:#F1F5F9>GET .../dev/models/{name}</color>
+    <color:#F1F5F9>DELETE .../dev/models/{name}/{ver}</color>
   end note
 }
 
@@ -59,9 +63,11 @@ rectangle "  <b><color:#FED7AA>API GATEWAY</color></b>  " as APIGW_Z #1E293B {
 ' ─────────────────────────────────────────────────────
 rectangle "  <b><color:#FCA5A5>COMPUTE</color></b>  " as COMPUTE_Z #1E293B {
 
-  component "<b><color:#F87171>λ Lambda Function</color></b>\n<size:10><color:#475569>Runtime: Container\nMemory: 3008 MB\nTimeout: 120 s\nArch: x86_64</color>\n<size:9><color:#F87171>aaas-mri-dev-inference</color></size>" as LAMBDA #7F1D1D
+  component "<b><color:#F87171>λ Lambda Function</color></b>\n<size:10><color:#475569>Runtime: <b>Docker</b> Container\nMemory: 3008 MB\nTimeout: 120 s\nArch: x86_64</color>\n<size:9><color:#F87171>aaas-mri-dev-inference</color></size>" as LAMBDA #7F1D1D
 
-  component "<b><color:#FB923C>⬡ ECS Fargate</color></b>\n<size:10><color:#475569>Flask inference service\nAuto-scaling\nContainer runtime</color>\n<size:9><color:#FB923C>aaas-mri-dev-inference-service</color></size>" as ECS #7C2D12
+  component "<b><color:#FB923C>⬡ ECS Fargate</color></b>\n<size:10><color:#475569>Flask inference service\nAuto-scaling\n<b>Docker</b> container</color>\n<size:9><color:#FB923C>aaas-mri-dev-inference-service</color></size>" as ECS #7C2D12
+
+  component "<b><color:#4ADE80>🖥  EC2 Instance</color></b>\n<size:10><color:#475569>AL2023 · t3.medium\n<b>Docker</b> inference app\nPort 8080 · 30 GB gp3</color>\n<size:9><color:#4ADE80>i-0832e29292f2e42a8</color>\n<color:#86EFAC>98.92.207.44</color></size>" as EC2 #14532D
 
   note bottom of LAMBDA
     <color:#94A3B8><b>Lambda Details</b></color>
@@ -81,6 +87,18 @@ rectangle "  <b><color:#FCA5A5>COMPUTE</color></b>  " as COMPUTE_Z #1E293B {
     <color:#F1F5F9>.us-east-1.amazonaws.com/</color>
     <color:#F1F5F9>aaas-mri-dev-ecs-inference</color>
   end note
+
+  note bottom of EC2
+    <color:#94A3B8><b>EC2 Details</b></color>
+    <color:#4ADE80>Instance:</color> <color:#F1F5F9>i-0832e29292f2e42a8</color>
+    <color:#4ADE80>Public IP:</color> <color:#F1F5F9>98.92.207.44</color>
+    <color:#4ADE80>Inference URL:</color>
+    <color:#F1F5F9>http://ec2-98-92-207-44</color>
+    <color:#F1F5F9>.compute-1.amazonaws.com:8080/predict</color>
+    <color:#4ADE80>Models URL:</color>
+    <color:#F1F5F9>:8080/models</color>
+    <color:#4ADE80>SG:</color> <color:#F1F5F9>sg-08b28b6c02acad97c</color>
+  end note
 }
 
 ' ─────────────────────────────────────────────────────
@@ -88,9 +106,9 @@ rectangle "  <b><color:#FCA5A5>COMPUTE</color></b>  " as COMPUTE_Z #1E293B {
 ' ─────────────────────────────────────────────────────
 rectangle "  <b><color:#FDE68A>CONTAINER REGISTRY</color></b>  " as ECR_Z #1E293B {
 
-  component "<b><color:#FBBF24>📦 ECR — Lambda</color></b>\n<size:9><color:#FDE68A>069835412283.dkr.ecr\n.us-east-1.amazonaws.com/\naaas-mri-dev-lambda-inference</color></size>" as ECR_LAMBDA #78350F
+  component "<b><color:#FBBF24>📦 ECR — Lambda</color></b>\n<size:10><b>Docker</b> Image Registry</size>\n<size:9><color:#FDE68A>069835412283.dkr.ecr\n.us-east-1.amazonaws.com/\naaas-mri-dev-lambda-inference</color></size>" as ECR_LAMBDA #78350F
 
-  component "<b><color:#FBBF24>📦 ECR — ECS</color></b>\n<size:9><color:#FDE68A>069835412283.dkr.ecr\n.us-east-1.amazonaws.com/\naaas-mri-dev-ecs-inference</color></size>" as ECR_ECS #78350F
+  component "<b><color:#FBBF24>📦 ECR — ECS</color></b>\n<size:10><b>Docker</b> Image Registry</size>\n<size:9><color:#FDE68A>069835412283.dkr.ecr\n.us-east-1.amazonaws.com/\naaas-mri-dev-ecs-inference</color></size>" as ECR_ECS #78350F
 }
 
 ' ─────────────────────────────────────────────────────
@@ -102,7 +120,7 @@ rectangle "  <b><color:#6EE7B7>STORAGE</color></b>  " as STORAGE_Z #1E293B {
 
   component "<b><color:#34D399>🗄  S3 — Image Bucket</color></b>\n<size:10><color:#475569>Uploaded MRI scans\nTemporary storage\nKMS encrypted</color>\n<size:9><color:#34D399>aaas-mri-dev-images-12c3f89a</color></size>" as S3_IMG #064E3B
 
-  component "<b><color:#60A5FA>⬡ DynamoDB</color></b>\n<size:10><color:#475569>Model Metadata Table\nHash key: model_name\nFields: storage_path · version</color>\n<size:9><color:#60A5FA>aaas-mri-dev-model-metadata</color></size>" as DYNAMO #1E3A5F
+  component "<b><color:#60A5FA>⬡ DynamoDB</color></b>\n<size:10><color:#475569>Model Metadata Table\nHash key: model_name\nRange key: version\nFields: storage_path · version</color>\n<size:9><color:#60A5FA>aaas-mri-dev-model-metadata</color></size>" as DYNAMO #1E3A5F
 
   note right of S3_MODEL
     <color:#94A3B8><b>Model Registry</b></color>
@@ -125,7 +143,7 @@ rectangle "  <b><color:#C4B5FD>SECURITY</color></b>  " as SECURITY_Z #1E293B {
 
   component "<b><color:#A78BFA>🔐 KMS</color></b>\n<size:10><color:#475569>Customer Managed Key\nEncrypts: S3, DynamoDB\nCloudWatch Logs</color>\n<size:9><color:#A78BFA>010561d9-a0ed-4c4f\n-99b8-44f504393dd5</color></size>" as KMS #3B0764
 
-  component "<b><color:#818CF8>🔑 IAM Roles</color></b>\n<size:10><color:#475569>Lambda execution role\nECS task role\nAPI Gateway role\nLeast-privilege</color>\n<size:9><color:#818CF8>aaas-mri-dev-*-role</color></size>" as IAM #1E1B4B
+  component "<b><color:#818CF8>🔑 IAM Roles</color></b>\n<size:10><color:#475569>Lambda execution role\nECS task role\nEC2 instance role\nAPI Gateway role\nLeast-privilege</color>\n<size:9><color:#818CF8>aaas-mri-dev-*-role</color></size>" as IAM #1E1B4B
 
   component "<b><color:#6EE7B7>🛡  Secrets Manager</color></b>\n<size:10><color:#475569>API Keys\nRotation enabled\nAES-256</color></size>" as SECRETS #064E3B
 }
@@ -141,13 +159,14 @@ rectangle "  <b><color:#FCA5A5>OBSERVABILITY</color></b>  " as OBS_Z #1E293B {
 '  IaC
 ' ─────────────────────────────────────────────────────
 rectangle "  <b><color:#A5F3FC>INFRASTRUCTURE AS CODE</color></b>  " as IAC_Z #1E293B {
-  component "<b><color:#22D3EE>⬛ Terraform</color></b>\n<size:10><color:#475569>AWS Provider 5.100.0\n8 Modules · Modular IaC\nterraform apply → all infra</color></size>" as TF #083344
+  component "<b><color:#22D3EE>⬛ Terraform</color></b>\n<size:10><color:#475569>AWS Provider 5.100.0\n9 Modules · Modular IaC\nterraform apply → all infra</color></size>" as TF #083344
 
   note bottom of TF
     <color:#94A3B8><b>Terraform Modules</b></color>
     <color:#22D3EE>modules/api_gateway</color>   <color:#F1F5F9>REST API + stage</color>
     <color:#22D3EE>modules/lambda</color>         <color:#F1F5F9>function + env vars</color>
     <color:#22D3EE>modules/ecs</color>             <color:#F1F5F9>task + service</color>
+    <color:#22D3EE>modules/ec2</color>             <color:#F1F5F9>instance + IAM + SG</color>
     <color:#22D3EE>modules/s3</color>              <color:#F1F5F9>model + image buckets</color>
     <color:#22D3EE>modules/dynamodb</color>        <color:#F1F5F9>metadata table</color>
     <color:#22D3EE>modules/ecr</color>             <color:#F1F5F9>container registry</color>
@@ -171,6 +190,7 @@ SCRIPTS   -[#6366F1,thickness=2]->  APIGW     : <color:#A5B4FC>test requests</co
 
 APIGW     -[#F87171,thickness=3]->  LAMBDA    : <color:#FCA5A5><b>Invoke (primary)</b>\nJSON proxy event</color>
 APIGW     -[#FB923C,thickness=2]->  ECS       : <color:#FED7AA>Route (fallback)</color>
+APIGW     -[#4ADE80,thickness=2]->  EC2       : <color:#86EFAC>Route (alternative)</color>
 
 LAMBDA    -[#34D399,thickness=2]->  S3_MODEL  : <color:#6EE7B7>download .pt\n(cold start)</color>
 LAMBDA    -[#60A5FA,thickness=2]->  DYNAMO    : <color:#93C5FD>lookup model\nstorage_path</color>
@@ -178,6 +198,9 @@ LAMBDA    -[#34D399,thickness=1,dashed]-> S3_IMG : <color:#6EE7B7>store image</c
 
 ECS       -[#34D399,thickness=2]->  S3_MODEL  : <color:#6EE7B7>load model</color>
 ECS       -[#60A5FA,thickness=2]->  DYNAMO    : <color:#93C5FD>lookup path</color>
+
+EC2       -[#4ADE80,thickness=2]->  S3_MODEL  : <color:#86EFAC>load model</color>
+EC2       -[#60A5FA,thickness=2]->  DYNAMO    : <color:#93C5FD>lookup path</color>
 
 ECR_LAMBDA -[#FBBF24,dashed,thickness=2]-> LAMBDA : <color:#FDE68A>image pull</color>
 ECR_ECS    -[#FBBF24,dashed,thickness=2]-> ECS    : <color:#FDE68A>image pull</color>
@@ -192,6 +215,7 @@ KMS       -[#A78BFA,dotted,thickness=2]-> CW        : <color:#C4B5FD>encrypt log
 
 IAM       -[#818CF8,dotted]-> LAMBDA    : <color:#C4B5FD>execution role</color>
 IAM       -[#818CF8,dotted]-> ECS       : <color:#C4B5FD>task role</color>
+IAM       -[#818CF8,dotted]-> EC2       : <color:#C4B5FD>instance role</color>
 
 LAMBDA    -[#F472B6,dotted]-> CW        : <color:#F9A8D4>emit logs</color>
 
@@ -208,6 +232,7 @@ legend bottom
   |= <color:#F1F5F9>Color</color> |= <color:#F1F5F9>Meaning</color> |
   | <back:#F87171> λ </back> | Primary serverless path |
   | <back:#FB923C> ⬡ </back> | Container fallback path |
+  | <back:#4ADE80>   </back> | VM compute (EC2) path |
   | <back:#34D399>   </back> | Storage I/O |
   | <back:#A78BFA>   </back> | Encryption (KMS) |
   | <back:#22D3EE>   </back> | Terraform provisioning |
