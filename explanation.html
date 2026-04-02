@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AaaS — Brain Tumor MRI Classification | Project Report</title>
+
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-soft: #eef2ff;
+      --primary-border: #c7d2fe;
+      --accent: #0ea5e9;
+      --accent-soft: #e0f2fe;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --surface: #f8fafc;
+      --card-bg: #ffffff;
+      --muted: #64748b;
+      --hero-from: #0f172a;
+      --hero-to: #1e1b4b;
+    }
+
+    * { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--surface);
+      color: #1e293b;
+      line-height: 1.75;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, var(--hero-from) 0%, #1e1b4b 45%, #0c4a6e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(6px);
+      border-radius: 50px;
+      font-size: .78rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 800; line-height: 1.2; }
+    .hero .lead { font-size: 1.05rem; color: rgba(255,255,255,0.75); }
+
+    .stat-pill {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: .6rem 1.1rem;
+      backdrop-filter: blur(6px);
+      color: #fff;
+      text-align: center;
+    }
+    .stat-pill .num { font-size: 1.6rem; font-weight: 800; }
+    .stat-pill .lbl { font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; opacity: .65; }
+
+    /* ── NAV ── */
+    .sticky-nav {
+      top: 0; z-index: 1000;
+      backdrop-filter: blur(12px);
+      background: rgba(255,255,255,0.88);
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .sticky-nav .nav-link {
+      font-size: .82rem; font-weight: 600;
+      color: var(--muted);
+      padding: .4rem .75rem;
+      border-radius: 6px;
+      transition: all .2s;
+    }
+    .sticky-nav .nav-link:hover { color: var(--primary); background: var(--primary-soft); }
+
+    /* ── SECTION HEADINGS ── */
+    .section-label {
+      display: inline-block;
+      font-size: .72rem; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--primary);
+      background: var(--primary-soft);
+      border: 1px solid var(--primary-border);
+      border-radius: 50px;
+      padding: .25rem .85rem;
+      margin-bottom: .75rem;
+    }
+    h2.section-title {
+      font-size: 1.9rem; font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 1rem;
+    }
+    h3.sub-title { font-size: 1.2rem; font-weight: 700; color: #1e293b; }
+
+    /* ── CARDS ── */
+    .card { border: 1px solid #e2e8f0; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+    .card-icon {
+      width: 48px; height: 48px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
+    .highlight-card {
+      border-left: 4px solid var(--primary);
+      background: linear-gradient(135deg, #fff 60%, var(--primary-soft));
+    }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute;
+      left: .85rem; top: .5rem; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--accent), var(--success));
+    }
+    .timeline-item { position: relative; margin-bottom: 2.5rem; }
+    .timeline-dot {
+      position: absolute;
+      left: -2rem; top: .15rem;
+      width: 1.5rem; height: 1.5rem;
+      border-radius: 50%;
+      background: var(--primary);
+      border: 3px solid #fff;
+      box-shadow: 0 0 0 3px var(--primary-border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: .55rem; color: #fff;
+    }
+    .timeline-item:nth-child(2) .timeline-dot { background: var(--accent); box-shadow: 0 0 0 3px #bae6fd; }
+    .timeline-item:nth-child(3) .timeline-dot { background: #8b5cf6; box-shadow: 0 0 0 3px #ede9fe; }
+    .timeline-item:nth-child(4) .timeline-dot { background: #f59e0b; box-shadow: 0 0 0 3px #fef3c7; }
+    .timeline-item:nth-child(5) .timeline-dot { background: #ef4444; box-shadow: 0 0 0 3px #fee2e2; }
+    .timeline-item:nth-child(6) .timeline-dot { background: var(--success); box-shadow: 0 0 0 3px #d1fae5; }
+    .timeline-item:nth-child(7) .timeline-dot { background: #0ea5e9; box-shadow: 0 0 0 3px #e0f2fe; }
+
+    .timeline-header {
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .phase-badge {
+      font-size: .7rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .1em;
+      padding: .25rem .7rem;
+      border-radius: 50px;
+    }
+
+    /* ── ARCHITECTURE DIAGRAM ── */
+    .arch-diagram {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #083344 100%);
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .arch-diagram::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at top right, rgba(99,102,241,.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at bottom left, rgba(14,165,233,.10) 0%, transparent 60%);
+    }
+    .arch-zone {
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 14px;
+      padding: 1rem 1rem;
+      position: relative;
+    }
+    .arch-zone-label {
+      position: absolute; top: -12px; left: 16px;
+      font-size: .65rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .1em;
+      padding: 2px 10px;
+      border-radius: 50px;
+    }
+    .arch-node {
+      border-radius: 12px;
+      padding: .65rem .9rem;
+      font-size: .8rem;
+      font-weight: 600;
+      text-align: center;
+      line-height: 1.3;
+      position: relative;
+    }
+    .arch-node small { font-weight: 400; font-size: .68rem; opacity: .75; display: block; margin-top: 2px; }
+    .arrow-row {
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.35); font-size: 1.3rem;
+      gap: .25rem;
+      margin: .3rem 0;
+    }
+    .arrow-label { font-size: .62rem; color: rgba(255,255,255,.45); }
+
+    /* ── CODE BLOCKS ── */
+    pre.code-block {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-radius: 12px;
+      padding: 1.25rem 1.5rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: .82rem;
+      overflow-x: auto;
+      border: 1px solid #1e293b;
+    }
+    .kw { color: #818cf8; }
+    .str { color: #34d399; }
+    .cmt { color: #475569; font-style: italic; }
+    .fn { color: #fbbf24; }
+    .num { color: #f87171; }
+
+    /* ── RESOURCE TABLE ── */
+    .resource-table td:first-child { font-family: 'JetBrains Mono', monospace; font-size: .78rem; color: #6366f1; }
+    .resource-table td:last-child  { font-family: 'JetBrains Mono', monospace; font-size: .76rem; color: #374151; word-break: break-all; }
+
+    /* ── METRIC CARDS ── */
+    .metric-card {
+      border-radius: 16px;
+      padding: 1.5rem;
+      color: #fff;
+      text-align: center;
+    }
+    .metric-card .metric-num { font-size: 2.2rem; font-weight: 800; line-height: 1; }
+    .metric-card .metric-lbl { font-size: .75rem; opacity: .75; text-transform: uppercase; letter-spacing: .08em; margin-top: .4rem; }
+
+    /* ── CLASS BADGES ── */
+    .class-card {
+      border-radius: 14px;
+      border: 1px solid #e2e8f0;
+      padding: 1.2rem;
+      transition: transform .2s;
+    }
+    .class-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,.1); }
+
+    /* ── FOOTER ── */
+    footer { background: var(--dark); color: rgba(255,255,255,.55); }
+    footer strong { color: rgba(255,255,255,.85); }
+
+    /* ── MISC ── */
+    .divider { border: none; height: 2px; background: linear-gradient(to right, transparent, #e2e8f0, transparent); margin: 3rem 0; }
+    .section-wrap { padding: 4rem 0; }
+    @media (max-width:768px) { .section-wrap { padding: 2.5rem 0; } }
+
+    .bg-primary-soft { background: var(--primary-soft); }
+    .text-primary-custom { color: var(--primary); }
+    .border-primary-soft { border-color: var(--primary-border) !important; }
+  </style>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     STICKY NAV
+══════════════════════════════════════════════════════ -->
+<nav class="sticky-top sticky-nav py-2 d-none d-md-block">
+  <div class="container d-flex align-items-center gap-1 justify-content-center">
+    <a class="nav-link" href="#overview"><i class="bi bi-grid-1x2 me-1"></i>Overview</a>
+    <a class="nav-link" href="#methodology"><i class="bi bi-diagram-3 me-1"></i>Methodology</a>
+    <a class="nav-link" href="#architecture"><i class="bi bi-cloud me-1"></i>Architecture</a>
+    <a class="nav-link" href="#phases"><i class="bi bi-list-check me-1"></i>Phases</a>
+    <a class="nav-link" href="#model"><i class="bi bi-cpu me-1"></i>ML Model</a>
+    <a class="nav-link" href="#terraform"><i class="bi bi-braces me-1"></i>Terraform</a>
+    <a class="nav-link" href="#api"><i class="bi bi-arrow-left-right me-1"></i>API</a>
+    <a class="nav-link" href="#results"><i class="bi bi-bar-chart me-1"></i>Results</a>
+    <a class="nav-link" href="#resources"><i class="bi bi-server me-1"></i>Resources</a>
+    <a class="nav-link" href="#webapp"><i class="bi bi-window me-1"></i>Web App</a>
+  </div>
+</nav>
+
+
+<!-- ══════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════ -->
+<section class="hero text-white py-5">
+  <div class="container py-3 position-relative">
+    <div class="row align-items-center gy-4">
+      <div class="col-lg-8">
+        <span class="hero-badge px-3 py-2 text-white fw-semibold d-inline-block mb-3">
+          <i class="bi bi-mortarboard me-2"></i>Thesis / Research Project · March 2026
+        </span>
+        <h1 class="text-white mb-3">
+          Cloud-Agnostic<br />
+          <span style="background: linear-gradient(90deg,#818cf8,#38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Analytics as a Service</span><br />
+          for Medical Image Classification
+        </h1>
+        <p class="lead mb-4">
+          Design and Implementation of a Cloud-Agnostic 'Analytics as a Service' (AaaS) Pattern
+          for Brain Tumor MRI Classification using <strong class="text-white">Terraform</strong>,
+          <strong class="text-white">PyTorch</strong>, and <strong class="text-white">AWS</strong>.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+          <span class="badge rounded-pill px-3 py-2 fs-6" style="background:rgba(99,102,241,.3);border:1px solid rgba(99,102,241,.5);">
+            <i class="bi bi-github me-1"></i>github.com/Jyoti-dev123/thesis
+          </span>
+          <span class="badge rounded-pill px-3 py-2 fs-6" style="background:rgba(14,165,233,.3);border:1px solid rgba(14,165,233,.5);">
+            <i class="bi bi-cloud me-1"></i>AWS us-east-1
+          </span>
+          <span class="badge rounded-pill px-3 py-2 fs-6" style="background:rgba(16,185,129,.3);border:1px solid rgba(16,185,129,.5);">
+            <i class="bi bi-check-circle me-1"></i>Fully Deployed
+          </span>
+        </div>
+      </div>
+      <div class="col-lg-4">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="stat-pill">
+              <div class="num">94.56%</div>
+              <div class="lbl">Model Accuracy</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-pill">
+              <div class="num">1147ms</div>
+              <div class="lbl">Warm Latency</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-pill">
+              <div class="num">4</div>
+              <div class="lbl">Tumor Classes</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-pill">
+              <div class="num">8</div>
+              <div class="lbl">Terraform Modules</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-pill">
+              <div class="num">3</div>
+              <div class="lbl">Architectures</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="stat-pill">
+              <div class="num">85%</div>
+              <div class="lbl">API Test Pass Rate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════
+     OVERVIEW
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap" id="overview">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-grid-1x2 me-1"></i>Overview</span>
+    <h2 class="section-title">What Is This Project?</h2>
+
+    <div class="row gy-4">
+      <div class="col-lg-7">
+        <p>
+          This thesis project designs and implements a fully cloud-agnostic <strong>Analytics as a Service (AaaS)</strong>
+          platform that classifies Brain Tumor MRI scans using deep learning. The system exposes a single REST API endpoint —
+          <code>POST /predict</code> — that accepts an MRI image and returns a JSON prediction from a trained
+          <strong>MobileNetV2</strong> convolutional neural network hosted on AWS.
+        </p>
+        <p>
+          The core innovation of this project is its emphasis on <strong>infrastructure portability</strong>. By encoding
+          every AWS resource — API Gateway, Lambda, ECS, S3, DynamoDB, IAM, KMS, and Secrets Manager — in modular
+          <strong>Terraform</strong> configurations, the entire cloud environment can be torn down and reproduced in minutes,
+          or migrated to a different provider by swapping provider modules. This addresses a key gap in existing cloud ML
+          deployments: hard-wired, vendor-locked infrastructure that cannot be easily moved or reproduced.
+        </p>
+        <p>
+          Three distinct compute architectures are provisioned and benchmarked side-by-side:
+          <strong>AWS Lambda</strong> (serverless container), <strong>ECS Fargate</strong> (managed container), and
+          <strong>Elastic Beanstalk</strong> (platform-as-a-service). This multi-architecture comparison gives practitioners
+          evidence-based guidance on which deployment model best fits their latency, throughput, and cost requirements.
+        </p>
+        <p>
+          The end product is a fully functional, secured, tested, and documented system — complete with a
+          <strong>Flask web interface</strong> for live demonstrations, performance benchmarking tools, and all code
+          published openly on GitHub for reproducibility.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="card h-100 p-4">
+          <h3 class="sub-title mb-3"><i class="bi bi-bullseye text-danger me-2"></i>Research Objectives</h3>
+          <ul class="list-unstyled mb-0">
+            <li class="d-flex gap-2 mb-3">
+              <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;flex-shrink:0;font-size:.7rem;">1</span>
+              <span>Design a reusable, cloud-agnostic AaaS pattern using Infrastructure-as-Code (Terraform).</span>
+            </li>
+            <li class="d-flex gap-2 mb-3">
+              <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;flex-shrink:0;font-size:.7rem;">2</span>
+              <span>Train a CNN-based classifier (MobileNetV2) on 7,000+ Brain Tumor MRI images across 4 classes.</span>
+            </li>
+            <li class="d-flex gap-2 mb-3">
+              <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;flex-shrink:0;font-size:.7rem;">3</span>
+              <span>Deploy, test, and benchmark three compute architectures: Lambda, ECS Fargate, and Beanstalk.</span>
+            </li>
+            <li class="d-flex gap-2 mb-3">
+              <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;flex-shrink:0;font-size:.7rem;">4</span>
+              <span>Implement end-to-end security: encryption at rest (KMS), API key auth, and least-privilege IAM.</span>
+            </li>
+            <li class="d-flex gap-2">
+              <span class="badge bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width:24px;height:24px;flex-shrink:0;font-size:.7rem;">5</span>
+              <span>Critically evaluate AaaS pattern limitations against existing approaches in the literature.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tumor Classes -->
+    <div class="mt-5">
+      <h3 class="sub-title mb-3"><i class="bi bi-diagram-2 me-2 text-primary-custom"></i>Classification Target — 4 Brain Tumor Classes</h3>
+      <div class="row g-3">
+        <div class="col-6 col-md-3">
+          <div class="class-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-danger rounded-pill px-2">High Risk</span>
+            </div>
+            <h5 class="fw-bold text-danger mb-1">Glioma</h5>
+            <p class="small text-muted mb-0">Originates from glial cells in the brain or spine. Accounts for ~33% of all brain tumors. Includes glioblastoma. Often aggressive and requires combined treatment.</p>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="class-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-warning text-dark rounded-pill px-2">Moderate</span>
+            </div>
+            <h5 class="fw-bold text-warning mb-1">Meningioma</h5>
+            <p class="small text-muted mb-0">Arises from the meninges surrounding the brain. The most common primary brain tumor (~30%). Most are benign and slow-growing; treatment often surgical.</p>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="class-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-success rounded-pill px-2">Benign</span>
+            </div>
+            <h5 class="fw-bold text-success mb-1">No Tumor</h5>
+            <p class="small text-muted mb-0">Scan shows no visible abnormality. Serving as the negative control class, it is critical for minimising false positives in clinical environments.</p>
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="class-card">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="badge bg-info text-dark rounded-pill px-2">Moderate</span>
+            </div>
+            <h5 class="fw-bold text-info mb-1">Pituitary</h5>
+            <p class="small text-muted mb-0">Develops in the pituitary gland at the base of the brain. Usually benign adenomas that can affect hormone regulation. Represents ~15% of all brain tumors.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     METHODOLOGY
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap bg-white" id="methodology">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-diagram-3 me-1"></i>Methodology</span>
+    <h2 class="section-title">Five-Phase Research Methodology</h2>
+    <p class="text-muted mb-5" style="max-width:720px;">
+      The project follows a structured five-phase methodology that incrementally builds, deploys, tests, and evaluates
+      the AaaS system. Each phase produces tangible artefacts — code, infrastructure, data, or documentation — that
+      feed directly into subsequent phases.
+    </p>
+
+    <div class="row gy-4">
+      <div class="col-md-6 col-xl-4">
+        <div class="card p-4 h-100 highlight-card">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="card-icon" style="background:#eef2ff;color:#4f46e5;"><i class="bi bi-search"></i></div>
+            <span class="badge bg-primary rounded-pill">Phase 1</span>
+          </div>
+          <h3 class="sub-title">Scoping, Design &amp; Architectural Exploration</h3>
+          <p class="small text-muted mb-0">
+            Reviewed existing cloud ML deployment patterns and identified limitations: vendor lock-in, lack of IaC, 
+            poor model lifecycle management. Defined the API contract (<code>POST /predict</code>), selected three
+            deployment architectures (Lambda, ECS, Beanstalk), and designed the Terraform module structure. Produced
+            architectural ADRs, security design decisions, and a comparison matrix of deployment trade-offs.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="card p-4 h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="card-icon" style="background:#e0f2fe;color:#0ea5e9;"><i class="bi bi-database"></i></div>
+            <span class="badge rounded-pill" style="background:#0ea5e9;">Phase 2</span>
+          </div>
+          <h3 class="sub-title">Environment Setup &amp; Data Preparation</h3>
+          <p class="small text-muted mb-0">
+            Configured Python virtual environment, installed PyTorch 2.9.1 + CUDA 12.8, Terraform v1.5+, AWS CLI,
+            and Docker. Downloaded the Kaggle Brain Tumor MRI Dataset (7,023 images). Implemented
+            <code>preprocess.py</code> to resize images to 224×224 RGB, normalise pixel values, and apply augmentation
+            (random flips, rotation, colour jitter). Trained MobileNetV2 using two-phase transfer learning — first 
+            training only the classifier head, then fine-tuning all layers — achieving 94.56% test accuracy.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="card p-4 h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="card-icon" style="background:#ede9fe;color:#8b5cf6;"><i class="bi bi-cloud-upload"></i></div>
+            <span class="badge rounded-pill" style="background:#8b5cf6;">Phase 3</span>
+          </div>
+          <h3 class="sub-title">Infrastructure Development &amp; Backend</h3>
+          <p class="small text-muted mb-0">
+            Authored 8 Terraform modules. Provisioned API Gateway, Lambda (3008 MB, 120s timeout, container image),
+            ECS Fargate service, two S3 buckets, DynamoDB metadata table, ECR repositories, IAM roles, KMS key, and
+            Secrets Manager. Implemented Lambda handler and ECS Flask inference service. Built model management scripts
+            to upload, version, and register models. Ran <code>terraform apply</code> to deploy all infrastructure.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="card p-4 h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="card-icon" style="background:#fef3c7;color:#f59e0b;"><i class="bi bi-speedometer2"></i></div>
+            <span class="badge rounded-pill" style="background:#f59e0b;">Phase 4</span>
+          </div>
+          <h3 class="sub-title">Deployment, Testing &amp; Benchmarking</h3>
+          <p class="small text-muted mb-0">
+            Deployed Lambda and ECS Docker images to ECR and applied infrastructure. Ran functional tests sending 20
+            real MRI images to <code>/predict</code>, achieving 85% pass rate (17/20 correct). Measured cold-start
+            latency (1,121 ms), warm average (1,147 ms), P90 (1,187 ms), and throughput (0.87 req/s). Estimated cost
+            at $0.056 per 1,000 requests on Lambda. Compared Lambda vs ECS vs Elastic Beanstalk on seven dimensions.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="card p-4 h-100">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="card-icon" style="background:#d1fae5;color:#10b981;"><i class="bi bi-file-earmark-text"></i></div>
+            <span class="badge rounded-pill" style="background:#10b981;">Phase 5</span>
+          </div>
+          <h3 class="sub-title">Analysis, Documentation &amp; Reproducibility</h3>
+          <p class="small text-muted mb-0">
+            Analysed system performance, scalability, and cost-efficiency. Produced architecture diagrams (overview
+            and detailed, in PlantUML). Built a Flask web application with Bootstrap 5 UI for live demonstration
+            and integrated a benchmarking page with Chart.js visualisations. Published all code — 53 files, 4,975
+            insertions — on GitHub. Documented known limitations and future improvement directions.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-4">
+        <div class="card p-4 h-100" style="background:linear-gradient(135deg,#0f172a,#1e1b4b);color:#fff;">
+          <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="card-icon" style="background:rgba(255,255,255,.12);color:#818cf8;"><i class="bi bi-star"></i></div>
+            <span class="badge" style="background:rgba(99,102,241,.4);border:1px solid rgba(99,102,241,.6);">Key Insight</span>
+          </div>
+          <h3 class="sub-title" style="color:#e0e7ff;">Cloud-Agnostic by Design</h3>
+          <p class="small mb-0" style="color:rgba(255,255,255,.7);">
+            By encoding all AWS resources in Terraform modules with parameterised inputs, the system's compute layer
+            (Lambda/ECS/Beanstalk) can be swapped without touching application code. The API contract and model 
+            storage interface remain stable — only the provider block and module implementations change. This is the 
+            core academic contribution of the thesis.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     ARCHITECTURE DIAGRAM
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap" id="architecture">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-cloud me-1"></i>Architecture</span>
+    <h2 class="section-title">System Architecture</h2>
+    <p class="text-muted mb-4" style="max-width:700px;">
+      The system is structured in four logical zones. A request flows from the client, through API Gateway, into a
+      compute backend, which consults DynamoDB, loads the model from S3, performs inference, and returns a prediction.
+      Security and IaC layers support but never block the data path.
+    </p>
+
+    <!-- Visual Architecture Diagram -->
+    <div class="arch-diagram">
+      <div class="position-relative" style="z-index:1;">
+        <!-- Row 1: Client -->
+        <div class="row justify-content-center mb-2">
+          <div class="col-auto">
+            <div class="arch-zone" style="border-color:rgba(96,165,250,.3);">
+              <span class="arch-zone-label" style="background:#1e3a8a;color:#93c5fd;">Client Layer</span>
+              <div class="d-flex gap-3 justify-content-center flex-wrap pt-1">
+                <div class="arch-node" style="background:#1d4ed8;color:#bfdbfe;min-width:130px;">
+                  <i class="bi bi-person-circle d-block mb-1 fs-5"></i>
+                  User / Researcher
+                  <small>MRI image upload</small>
+                </div>
+                <div class="arch-node" style="background:#1e40af;color:#bfdbfe;min-width:140px;">
+                  <i class="bi bi-window d-block mb-1 fs-5"></i>
+                  Flask Web App
+                  <small>Bootstrap 5 · :5000</small>
+                </div>
+                <div class="arch-node" style="background:#312e81;color:#c7d2fe;min-width:130px;">
+                  <i class="bi bi-terminal d-block mb-1 fs-5"></i>
+                  Test Scripts
+                  <small>test_api.py</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div class="arrow-row">
+          <i class="bi bi-arrow-down-circle-fill" style="color:#fb923c;"></i>
+          <span class="arrow-label">HTTPS POST /predict · multipart/form-data</span>
+        </div>
+
+        <!-- Row 2: API Gateway -->
+        <div class="row justify-content-center mb-2">
+          <div class="col-auto">
+            <div class="arch-zone" style="border-color:rgba(251,146,60,.3);">
+              <span class="arch-zone-label" style="background:#7c2d12;color:#fed7aa;">API Gateway</span>
+              <div class="d-flex gap-3 justify-content-center pt-1">
+                <div class="arch-node" style="background:#9a3412;color:#fed7aa;min-width:300px;">
+                  <i class="bi bi-lightning-charge-fill d-inline me-1"></i>
+                  <strong>AWS API Gateway</strong> — REST · Stage: dev
+                  <small>https://whaveg4pu8.execute-api.us-east-1.amazonaws.com/dev/predict · API Key Auth</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div class="arrow-row">
+          <i class="bi bi-arrow-down-circle-fill" style="color:#f87171;"></i>
+          <span class="arrow-label">Invoke (primary λ) · Route (fallback ECS)</span>
+        </div>
+
+        <!-- Row 3: Compute -->
+        <div class="row justify-content-center mb-2">
+          <div class="col-auto">
+            <div class="arch-zone" style="border-color:rgba(248,113,113,.3);">
+              <span class="arch-zone-label" style="background:#7f1d1d;color:#fca5a5;">Compute</span>
+              <div class="d-flex gap-3 justify-content-center flex-wrap pt-1">
+                <div class="arch-node" style="background:#991b1b;color:#fecaca;min-width:170px;">
+                  <i class="bi bi-hdd-network d-block mb-1 fs-5"></i>
+                  <strong>λ AWS Lambda</strong>
+                  <small>Container · 3008 MB · 120s<br/>aaas-mri-dev-inference</small>
+                </div>
+                <div class="arch-node" style="background:#92400e;color:#fde68a;min-width:170px;">
+                  <i class="bi bi-boxes d-block mb-1 fs-5"></i>
+                  <strong>ECS Fargate</strong>
+                  <small>Flask service · Auto-scale<br/>aaas-mri-dev-inference-service</small>
+                </div>
+                <div class="arch-node" style="background:#3b0764;color:#e9d5ff;min-width:170px;">
+                  <i class="bi bi-layers d-block mb-1 fs-5"></i>
+                  <strong>Elastic Beanstalk</strong>
+                  <small>Managed platform<br/>Simplified scaling</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow down -->
+        <div class="arrow-row">
+          <i class="bi bi-arrow-down-circle-fill" style="color:#34d399;"></i>
+          <span class="arrow-label">lookup metadata · download model · store image</span>
+        </div>
+
+        <!-- Row 4: Storage & Security -->
+        <div class="row justify-content-center g-3 mb-2">
+          <div class="col-auto">
+            <div class="arch-zone" style="border-color:rgba(52,211,153,.3);">
+              <span class="arch-zone-label" style="background:#064e3b;color:#6ee7b7;">Storage</span>
+              <div class="d-flex gap-3 flex-wrap justify-content-center pt-1">
+                <div class="arch-node" style="background:#065f46;color:#a7f3d0;min-width:155px;">
+                  <i class="bi bi-archive d-block mb-1 fs-5"></i>
+                  <strong>S3 — Models</strong>
+                  <small>aaas-mri-dev-models-12c3f89a<br/>brain_tumor_model.pt</small>
+                </div>
+                <div class="arch-node" style="background:#065f46;color:#a7f3d0;min-width:155px;">
+                  <i class="bi bi-image d-block mb-1 fs-5"></i>
+                  <strong>S3 — Images</strong>
+                  <small>aaas-mri-dev-images-12c3f89a<br/>Uploaded MRI scans</small>
+                </div>
+                <div class="arch-node" style="background:#1e3a8a;color:#93c5fd;min-width:155px;">
+                  <i class="bi bi-table d-block mb-1 fs-5"></i>
+                  <strong>DynamoDB</strong>
+                  <small>aaas-mri-dev-model-metadata<br/>model_name · version · path</small>
+                </div>
+                <div class="arch-node" style="background:#fbbf24;color:#1c1917;min-width:130px;">
+                  <i class="bi bi-box-seam d-block mb-1 fs-5"></i>
+                  <strong>ECR</strong>
+                  <small>Lambda + ECS images<br/>Account 069835412283</small>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-auto">
+            <div class="arch-zone" style="border-color:rgba(167,139,250,.3);">
+              <span class="arch-zone-label" style="background:#3b0764;color:#c4b5fd;">Security</span>
+              <div class="d-flex gap-3 flex-wrap justify-content-center pt-1">
+                <div class="arch-node" style="background:#4c1d95;color:#e9d5ff;min-width:130px;">
+                  <i class="bi bi-key d-block mb-1 fs-5"></i>
+                  <strong>KMS</strong>
+                  <small>010561d9-a0ed<br/>-4c4f-99b8-...</small>
+                </div>
+                <div class="arch-node" style="background:#312e81;color:#c7d2fe;min-width:130px;">
+                  <i class="bi bi-shield-check d-block mb-1 fs-5"></i>
+                  <strong>IAM Roles</strong>
+                  <small>aaas-mri-dev-*<br/>Least-privilege</small>
+                </div>
+                <div class="arch-node" style="background:#134e4a;color:#99f6e4;min-width:130px;">
+                  <i class="bi bi-lock d-block mb-1 fs-5"></i>
+                  <strong>Secrets Mgr</strong>
+                  <small>API Keys<br/>Rotation enabled</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Arrow up (response) -->
+        <div class="arrow-row">
+          <i class="bi bi-arrow-up-circle-fill" style="color:#818cf8;"></i>
+          <span class="arrow-label">JSON response · {"classification":"glioma","confidence":0.984}</span>
+        </div>
+
+        <!-- IaC -->
+        <div class="row justify-content-center">
+          <div class="col-auto">
+            <div class="arch-zone" style="border-color:rgba(34,211,238,.3);">
+              <span class="arch-zone-label" style="background:#083344;color:#a5f3fc;">Infrastructure as Code</span>
+              <div class="d-flex gap-2 justify-content-center pt-1">
+                <div class="arch-node" style="background:#164e63;color:#a5f3fc;min-width:320px;">
+                  <i class="bi bi-braces d-inline me-1"></i>
+                  <strong>Terraform</strong> — AWS Provider 5.100.0 · 8 Modules · <code style="font-size:.68rem;">terraform apply</code>
+                  <small>provisions all resources above</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /position-relative -->
+    </div><!-- /arch-diagram -->
+
+    <!-- Legend -->
+    <div class="row g-2 mt-3">
+      <div class="col-auto"><span class="badge rounded-pill px-3 py-2" style="background:#dc2626;">λ Lambda — primary path</span></div>
+      <div class="col-auto"><span class="badge rounded-pill px-3 py-2" style="background:#d97706;">⬡ ECS — fallback path</span></div>
+      <div class="col-auto"><span class="badge rounded-pill px-3 py-2" style="background:#059669;">Storage I/O</span></div>
+      <div class="col-auto"><span class="badge rounded-pill px-3 py-2" style="background:#7c3aed;">Security layer</span></div>
+      <div class="col-auto"><span class="badge rounded-pill px-3 py-2" style="background:#0284c7;">Terraform provisioning</span></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     STEP-BY-STEP PHASES
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap bg-white" id="phases">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-list-check me-1"></i>Execution Steps</span>
+    <h2 class="section-title">Step-by-Step Project Execution</h2>
+    <p class="text-muted mb-5" style="max-width:720px;">
+      The following timeline documents every concrete action taken — from initial environment setup to the final
+      GitHub push — with the commands executed and artefacts produced at each step.
+    </p>
+
+    <div class="timeline">
+
+      <!-- STEP 1 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-tools"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 1 — Environment & Tool Setup</h4>
+            <span class="phase-badge bg-primary text-white">Phase 1–2</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            The development environment was configured to support GPU-accelerated deep learning, cloud provisioning,
+            and containerised deployment. Python 3.12 was used along with a dedicated virtual environment at
+            <code>F:\venv</code>. Key packages installed include PyTorch 2.9.1 with CUDA 12.8, Terraform v1.5+,
+            AWS CLI v2, Docker Desktop, and the AWS provider SDK (boto3).
+          </p>
+          <pre class="code-block">
+<span class="cmt"># Activate virtual environment</span>
+<span class="kw">F:\venv\Scripts\Activate.ps1</span>
+
+<span class="cmt"># Install PyTorch with CUDA 12.8</span>
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+
+<span class="cmt"># Install project dependencies</span>
+pip install boto3 flask requests python-dotenv onnx
+
+<span class="cmt"># Verify GPU availability</span>
+python -c "<span class="str">import torch; print(torch.cuda.is_available(), torch.version.cuda)</span>"
+<span class="cmt"># Output: True  12.8</span></pre>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-database"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 2 — Dataset Download & Preprocessing</h4>
+            <span class="phase-badge text-white" style="background:#0ea5e9;">Phase 2</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            The Brain Tumor MRI Dataset was downloaded from Kaggle (Masoud Nickparvar). It contains 7,023 T1-weighted
+            MRI scans in JPEG format spread across four classes: <code>glioma</code>, <code>meningioma</code>,
+            <code>notumor</code>, and <code>pituitary</code>. The dataset was pre-split into Training
+            (5,712 images) and Testing (1,311 images) folders. Preprocessing resized every image to 224×224 and
+            normalised using ImageNet mean and standard deviation. Data augmentation — random horizontal flips,
+            rotation up to 10°, and colour jitter — was applied to the training split to reduce overfitting.
+          </p>
+          <div class="row g-3">
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#fef2f2;border:1px solid #fecaca;">
+                <div class="fw-bold text-danger">Glioma</div>
+                <div class="small text-muted">1,621 train</div>
+                <div class="small text-muted">300 test</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#fffbeb;border:1px solid #fde68a;">
+                <div class="fw-bold text-warning">Meningioma</div>
+                <div class="small text-muted">1,645 train</div>
+                <div class="small text-muted">306 test</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#f0fdf4;border:1px solid #bbf7d0;">
+                <div class="fw-bold text-success">No Tumor</div>
+                <div class="small text-muted">2,000 train</div>
+                <div class="small text-muted">405 test</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#f0f9ff;border:1px solid #bae6fd;">
+                <div class="fw-bold text-info">Pituitary</div>
+                <div class="small text-muted">1,457 train</div>
+                <div class="small text-muted">300 test</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-cpu"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 3 — Model Training (MobileNetV2, PyTorch + CUDA)</h4>
+            <span class="phase-badge text-white" style="background:#8b5cf6;">Phase 2</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            A pre-trained MobileNetV2 (ImageNet weights) was fine-tuned on the MRI dataset using a two-phase
+            transfer learning strategy. In <strong>Phase A</strong>, only the final classifier head was trained
+            (10 epochs, learning rate 1e-3) while all backbone layers were frozen. In <strong>Phase B</strong>,
+            the entire model was unfrozen and trained end-to-end at a reduced learning rate (1e-4, 10 more epochs)
+            to allow fine-grained feature adaptation. Cross-entropy loss, Adam optimiser, and a step learning-rate
+            scheduler were used. Training ran on an NVIDIA GPU with CUDA 12.8. The trained model was exported in
+            two formats: <code>brain_tumor_model.pt</code> (PyTorch native) and <code>brain_tumor_model.onnx</code>
+            for runtime-agnostic deployment.
+          </p>
+          <pre class="code-block">
+python model/train_model.py
+
+<span class="cmt"># Phase A (frozen backbone)</span>
+Epoch 10/10 | Loss: 0.2134 | Val Acc: <span class="num">91.2%</span>
+
+<span class="cmt"># Phase B (full fine-tune)</span>
+Epoch 10/10 | Loss: 0.1467 | Val Acc: <span class="num">94.1%</span>
+
+<span class="cmt"># Final test evaluation</span>
+Test Accuracy: <span class="str">94.56%</span>  (1240 / 1311 correct)
+
+<span class="cmt"># Saved models</span>
+model/brain_tumor_model.pt    <span class="cmt"># PyTorch checkpoint</span>
+model/brain_tumor_model.onnx  <span class="cmt"># ONNX export</span></pre>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-braces"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 4 — Terraform Infrastructure Provisioning</h4>
+            <span class="phase-badge text-warning" style="background:#78350f;">Phase 3</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            Eight Terraform modules were authored under <code>terraform/modules/</code>. Each module follows the
+            single-responsibility principle — a module manages exactly one AWS service family. The root module
+            (<code>terraform/main.tf</code>) wires modules together, passing outputs from one as inputs to another
+            (e.g., the S3 bucket ARN is passed to the IAM module to generate least-privilege policies). After running
+            <code>terraform init</code> and <code>terraform plan</code>, <code>terraform apply</code> was executed
+            and all 47 AWS resources were created in approximately 4 minutes.
+          </p>
+          <div class="row g-2 mb-3">
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#eef2ff;color:#4f46e5;border:1px solid #c7d2fe;"><i class="bi bi-lightning me-1"></i>modules/api_gateway</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;"><i class="bi bi-hdd me-1"></i>modules/lambda</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#fffbeb;color:#d97706;border:1px solid #fde68a;"><i class="bi bi-boxes me-1"></i>modules/ecs</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;"><i class="bi bi-archive me-1"></i>modules/s3</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#f0f9ff;color:#0284c7;border:1px solid #bae6fd;"><i class="bi bi-table me-1"></i>modules/dynamodb</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#fdf4ff;color:#9333ea;border:1px solid #e9d5ff;"><i class="bi bi-shield me-1"></i>modules/iam</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#fff7ed;color:#ea580c;border:1px solid #fed7aa;"><i class="bi bi-box-seam me-1"></i>modules/ecr</div></div>
+            <div class="col-6 col-lg-3"><div class="p-2 rounded small text-center fw-semibold" style="background:#f0fdfa;color:#0d9488;border:1px solid #99f6e4;"><i class="bi bi-key me-1"></i>modules/security</div></div>
+          </div>
+          <pre class="code-block">
+<span class="kw">cd</span> terraform
+terraform init   <span class="cmt"># download AWS provider 5.100.0</span>
+terraform plan   <span class="cmt"># preview 47 resources to create</span>
+terraform apply  <span class="cmt"># deploy — ~4 minutes</span>
+
+<span class="cmt"># Key outputs:</span>
+api_gateway_url    = <span class="str">"https://whaveg4pu8.execute-api.us-east-1.amazonaws.com/dev"</span>
+lambda_function    = <span class="str">"aaas-mri-dev-inference"</span>
+model_bucket       = <span class="str">"aaas-mri-dev-models-12c3f89a"</span>
+dynamodb_table     = <span class="str">"aaas-mri-dev-model-metadata"</span>
+kms_key_id         = <span class="str">"010561d9-a0ed-4c4f-99b8-44f504393dd5"</span></pre>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-box-arrow-up"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 5 — Model Upload, Docker Build & ECR Push</h4>
+            <span class="phase-badge text-white" style="background:#ef4444;">Phase 3–4</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            The trained model file (<code>brain_tumor_model.pt</code>) was uploaded to the S3 model bucket using
+            <code>scripts/upload_model.py</code>, and model metadata (name, version, storage path) was registered
+            in the DynamoDB table via <code>scripts/register_model.py</code>. Two Docker images were then built:
+            one for Lambda (Python-slim base with the handler and model dependency) and one for ECS (Flask app).
+            Both images were pushed to their respective ECR repositories. A key challenge encountered was that the
+            Lambda OCI manifest list format was not supported — resolved by building with <code>--provenance=false</code>.
+            The Lambda function was then updated to point to the new ECR image digest.
+          </p>
+          <pre class="code-block">
+<span class="cmt"># Upload model to S3</span>
+python scripts/upload_model.py
+<span class="cmt"># Registered: aaas-mri-dev-models-12c3f89a/models/brain_tumor_model.pt</span>
+
+<span class="cmt"># Register in DynamoDB</span>
+python scripts/register_model.py
+<span class="cmt"># Item: {model_name: "mri", version: "v20260328164054", storage_path: ...}</span>
+
+<span class="cmt"># Build & push Lambda image</span>
+docker build --provenance=<span class="num">false</span> -t aaas-lambda . --no-cache
+docker push <span class="str">069835412283.dkr.ecr.us-east-1.amazonaws.com/aaas-mri-dev-lambda-inference</span>
+
+<span class="cmt"># Update Lambda to use new image</span>
+aws lambda update-function-code --function-name aaas-mri-dev-inference \
+  --image-uri <span class="str">069835412283.dkr.ecr.us-east-1.amazonaws.com/aaas-mri-dev-lambda-inference:latest</span></pre>
+        </div>
+      </div>
+
+      <!-- STEP 6 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-check2-circle"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 6 — Debugging, Functional Testing & Performance Benchmarking</h4>
+            <span class="phase-badge text-white" style="background:#10b981;">Phase 4</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            Two bugs were encountered and fixed during deployment. First, a <code>NameError: name 'tf' is not defined</code>
+            was caused by a leftover TensorFlow import block — removed by truncating the handler at line 177.
+            Second, a <code>UnpicklingError: weights_only load failed</code> in PyTorch 2.6+ was resolved by adding
+            <code>weights_only=False</code> to <code>torch.load()</code>. After fixing, the Lambda was rebuilt with
+            <code>--no-cache</code>, pushed, and the function updated. Functional testing sent 20 real MRI images
+            (5 per class) to the API and compared predictions against ground truth, achieving an 85% pass rate (17/20).
+          </p>
+          <pre class="code-block">
+python scripts/test_api.py
+
+<span class="cmt"># Results:</span>
+glioma_001.jpg      → <span class="str">glioma</span>      ✓
+meningioma_003.jpg  → <span class="str">meningioma</span>  ✓
+notumor_007.jpg     → <span class="str">notumor</span>     ✓
+pituitary_002.jpg   → <span class="str">pituitary</span>   ✓
+
+Result: <span class="num">17/20</span> correct  (<span class="str">85% pass rate</span>)
+
+<span class="cmt">───── Performance Benchmark ─────</span>
+python scripts/measure_performance.py
+
+Cold-start latency : <span class="num">1121</span> ms
+Warm avg latency   : <span class="num">1147</span> ms
+P50 latency        : <span class="num">1152</span> ms
+P90 latency        : <span class="num">1187</span> ms
+Throughput         : <span class="num">0.87</span> req/s
+Est. cost (Lambda) : $<span class="num">0.0563</span> / 1000 requests</pre>
+        </div>
+      </div>
+
+      <!-- STEP 7 -->
+      <div class="timeline-item">
+        <div class="timeline-dot"><i class="bi bi-window"></i></div>
+        <div class="timeline-header">
+          <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+            <h4 class="mb-0 fw-bold">Step 7 — Flask Web Application & GitHub Publication</h4>
+            <span class="phase-badge text-white" style="background:#0ea5e9;">Phase 5</span>
+          </div>
+          <p class="text-muted mb-3 small">
+            A Flask web application was developed under <code>webapp/</code> with Bootstrap 5.3 styling to serve as
+            a live demonstration interface. The app includes a drag-and-drop MRI image upload page with class result
+            display, a sample image gallery (12 thumbnails, 3 per class), and an interactive performance benchmark
+            page with Chart.js graphs (latency timeline, distribution histogram, percentile chart). A REST endpoint
+            <code>POST /api/benchmark</code> runs N sequential requests and returns per-request timing data. The
+            entire codebase — 53 files, 4,975 insertions — was pushed to GitHub using git, with sensitive files
+            excluded via <code>.gitignore</code> (AWS credentials, private keys, Terraform plan).
+          </p>
+          <pre class="code-block">
+<span class="cmt"># Start Flask app</span>
+python webapp/app.py
+<span class="cmt"># Serving on http://127.0.0.1:5000</span>
+<span class="cmt"># All requests → 200 OK</span>
+
+<span class="cmt"># Git push to GitHub</span>
+git init
+git add .
+git commit -m <span class="str">"Initial commit — full AaaS thesis project"</span>
+git remote add origin https://github.com/Jyoti-dev123/thesis.git
+git push origin master
+<span class="cmt"># 53 files  ·  4975 insertions  ·  commit 841964a</span>
+
+<span class="cmt"># Add architecture diagrams</span>
+git add diagrams/
+git commit -m <span class="str">"Add PlantUML architecture diagrams (overview + detailed)"</span>
+git push origin master
+<span class="cmt"># commit 78511c8</span></pre>
+        </div>
+      </div>
+
+    </div><!-- /timeline -->
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     ML MODEL
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap" id="model">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-cpu me-1"></i>ML Model</span>
+    <h2 class="section-title">Machine Learning Model</h2>
+    <div class="row gy-4">
+      <div class="col-lg-7">
+        <p>
+          The classification model is a <strong>MobileNetV2</strong> convolutional neural network pre-trained on the
+          ImageNet dataset (1.4M images, 1,000 classes). MobileNetV2 was chosen for its excellent trade-off between
+          accuracy and inference speed, making it suitable for deployment in latency-sensitive cloud environments.
+          Its depthwise separable convolutions reduce computation by a factor of roughly 8–9× compared to standard
+          convolutions while maintaining competitive accuracy.
+        </p>
+        <p>
+          The pre-trained backbone's feature extraction capabilities were leveraged through <strong>transfer learning</strong>.
+          The ImageNet classifier head was replaced with a new fully-connected layer producing four output logits
+          (one per tumour class). Training proceeded in two phases: first, only the new head was trained to warm up
+          the classifier weights; second, all layers were unfrozen for end-to-end fine-tuning at a 10× lower learning
+          rate to preserve the backbone's general features while adapting them to MRI texture.
+        </p>
+        <p>
+          The final model achieves <strong>94.56% accuracy</strong> on the 1,311-image held-out test set — strong
+          performance given the visual similarity between some tumour types (particularly glioma and meningioma in T1
+          MRI). The model weights are stored in PyTorch native format (<code>.pt</code>) and additionally exported
+          to ONNX for runtime-agnostic deployment scenarios.
+        </p>
+      </div>
+      <div class="col-lg-5">
+        <div class="card p-4 h-100">
+          <h3 class="sub-title mb-3"><i class="bi bi-info-circle me-2 text-primary-custom"></i>Model Specifications</h3>
+          <table class="table table-sm small mb-0">
+            <tbody>
+              <tr><td class="fw-semibold text-muted">Architecture</td><td>MobileNetV2 (transfer learning)</td></tr>
+              <tr><td class="fw-semibold text-muted">Framework</td><td>PyTorch 2.9.1 + CUDA 12.8</td></tr>
+              <tr><td class="fw-semibold text-muted">Input size</td><td>224 × 224 RGB</td></tr>
+              <tr><td class="fw-semibold text-muted">Output</td><td>4-class softmax logits</td></tr>
+              <tr><td class="fw-semibold text-muted">Loss function</td><td>Cross-Entropy</td></tr>
+              <tr><td class="fw-semibold text-muted">Optimiser</td><td>Adam (lr=1e-3 → 1e-4)</td></tr>
+              <tr><td class="fw-semibold text-muted">Epochs</td><td>10 (head) + 10 (full fine-tune)</td></tr>
+              <tr><td class="fw-semibold text-muted">Test accuracy</td><td class="fw-bold text-success">94.56%</td></tr>
+              <tr><td class="fw-semibold text-muted">Export formats</td><td><code>.pt</code> · <code>.onnx</code></td></tr>
+              <tr><td class="fw-semibold text-muted">Model size</td><td>~10 MB</td></tr>
+              <tr><td class="fw-semibold text-muted">S3 path</td><td><code>models/brain_tumor_model.pt</code></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     TERRAFORM
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap bg-white" id="terraform">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-braces me-1"></i>Infrastructure as Code</span>
+    <h2 class="section-title">Terraform Infrastructure</h2>
+    <p class="text-muted mb-4" style="max-width:720px;">
+      All AWS infrastructure is defined declaratively in Terraform. The modular design means each AWS service
+      family is fully encapsulated — compute can be swapped between Lambda, ECS, and Beanstalk by changing a
+      single module reference without affecting storage, security, or networking.
+    </p>
+    <div class="row gy-4">
+      <div class="col-lg-6">
+        <p>
+          The root module (<code>terraform/main.tf</code>) acts as a wiring harness. It instantiates each child
+          module and threads outputs from one into inputs for the next — for example, the KMS key ARN from the
+          <code>security</code> module is passed to both the <code>s3</code> and <code>dynamodb</code> modules
+          to enable at-rest encryption with the same customer-managed key. This pattern enforces DRY (Don't Repeat
+          Yourself) principles across the configuration.
+        </p>
+        <p>
+          Variable files (<code>terraform.tfvars</code>) externalise all environment-specific values: AWS region,
+          account ID, project name, and feature flags (e.g., whether to enable Elastic Beanstalk). This means the
+          same Terraform codebase can deploy identically to <em>dev</em>, <em>staging</em>, and <em>prod</em>
+          environments by switching a single tfvars file — a core property of a cloud-agnostic pattern.
+        </p>
+        <p>
+          The <strong>security</strong> module provisions a KMS Customer Managed Key with rotation enabled. All S3
+          bucket objects, DynamoDB table data, and CloudWatch log groups are encrypted using this key. The IAM module
+          creates execution roles with the minimum required permissions — each role grants only the S3 bucket and
+          DynamoDB table ARN it actually needs to access, implementing true least-privilege access control.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-4">
+          <h3 class="sub-title mb-3"><i class="bi bi-folder2-open me-2 text-primary-custom"></i>Module Directory</h3>
+          <div class="d-flex flex-column gap-2">
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#4f46e5;min-width:120px;text-align:center;">api_gateway</span>
+              <span class="small text-muted">REST API, /predict resource, POST method, stage deployment, API key usage plan</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#dc2626;min-width:120px;text-align:center;">lambda</span>
+              <span class="small text-muted">Container-image function, 3008 MB memory, 120s timeout, environment variables, ECR integration</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#d97706;min-width:120px;text-align:center;">ecs</span>
+              <span class="small text-muted">ECS cluster, Fargate task definition, service, ALB, auto-scaling configuration</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#16a34a;min-width:120px;text-align:center;">s3</span>
+              <span class="small text-muted">Model bucket + image bucket, versioning, KMS SSE, lifecycle rules, bucket policies</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#0284c7;min-width:120px;text-align:center;">dynamodb</span>
+              <span class="small text-muted">PAY_PER_REQUEST billing, KMS encryption, DynamoDB Streams, TTL attribute</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#9333ea;min-width:120px;text-align:center;">iam</span>
+              <span class="small text-muted">Lambda & ECS execution roles, least-privilege inline policies, assume-role trust policies</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#ea580c;min-width:120px;text-align:center;">ecr</span>
+              <span class="small text-muted">Private ECR repositories for Lambda and ECS images, lifecycle rules, scan-on-push</span>
+            </div>
+            <div class="d-flex align-items-start gap-3 p-2 rounded" style="background:#f8fafc;">
+              <span class="badge" style="background:#0d9488;min-width:120px;text-align:center;">security</span>
+              <span class="small text-muted">KMS CMK with rotation, Secrets Manager secret, resource-based policies</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     API CONTRACT
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap" id="api">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-arrow-left-right me-1"></i>API</span>
+    <h2 class="section-title">API Contract</h2>
+    <div class="row gy-4">
+      <div class="col-lg-6">
+        <p>
+          The system exposes a single endpoint that serves as the stable contract between any client and any backend
+          compute implementation. Keeping the API surface minimal means clients need no knowledge of whether
+          prediction is performed by Lambda, ECS, or Elastic Beanstalk — the response schema is identical in all cases.
+        </p>
+        <p>
+          Requests are authenticated via an API key supplied in the <code>x-api-key</code> HTTP header, managed
+          through AWS API Gateway usage plans. The image and metadata are sent as <code>multipart/form-data</code>
+          to allow binary image payloads alongside structured JSON metadata — matching how clinical systems
+          typically submit medical images.
+        </p>
+        <p>
+          The response always contains a <code>classification</code> field with one of the four valid class names.
+          When served through the web application, additional fields such as <code>confidence</code> and
+          <code>latency_ms</code> are appended by the Flask proxy layer to enrich the UI experience without
+          modifying the core API contract.
+        </p>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-4">
+          <h3 class="sub-title mb-3">Endpoint Specification</h3>
+          <table class="table table-sm small mb-3">
+            <tr><td class="fw-semibold text-muted">URL</td><td><code class="small">https://whaveg4pu8.execute-api<br/>.us-east-1.amazonaws.com/dev/predict</code></td></tr>
+            <tr><td class="fw-semibold text-muted">Method</td><td><span class="badge bg-success">POST</span></td></tr>
+            <tr><td class="fw-semibold text-muted">Content-Type</td><td><code>multipart/form-data</code></td></tr>
+            <tr><td class="fw-semibold text-muted">Auth</td><td><code>x-api-key</code> header</td></tr>
+          </table>
+          <pre class="code-block" style="font-size:.74rem;">
+<span class="cmt"># Request fields</span>
+metadata : {"model": "mri"}
+image    : &lt;binary JPG/PNG&gt;
+
+<span class="cmt"># Success response (200)</span>
+{
+  "<span class="str">classification</span>": <span class="str">"glioma"</span>,
+  "<span class="str">confidence</span>": <span class="num">0.984</span>,
+  "<span class="str">latency_ms</span>": <span class="num">1147</span>
+}
+
+<span class="cmt"># Valid classification values</span>
+<span class="str">"glioma"</span> | <span class="str">"meningioma"</span> | <span class="str">"notumor"</span> | <span class="str">"pituitary"</span></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     RESULTS
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap bg-white" id="results">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-bar-chart me-1"></i>Results</span>
+    <h2 class="section-title">Performance Results & Analysis</h2>
+
+    <!-- Metric cards -->
+    <div class="row g-3 mb-5">
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);">
+          <div class="metric-num">94.56%</div>
+          <div class="metric-lbl">Model Accuracy</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#dc2626,#991b1b);">
+          <div class="metric-num">1121ms</div>
+          <div class="metric-lbl">Cold-Start Latency</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#0ea5e9,#0284c7);">
+          <div class="metric-num">1147ms</div>
+          <div class="metric-lbl">Warm Avg Latency</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#10b981,#059669);">
+          <div class="metric-num">$0.056</div>
+          <div class="metric-lbl">Cost / 1,000 Requests</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#f59e0b,#d97706);">
+          <div class="metric-num">1187ms</div>
+          <div class="metric-lbl">P90 Latency</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#8b5cf6,#6d28d9);">
+          <div class="metric-num">0.87</div>
+          <div class="metric-lbl">Req/s Throughput</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#ef4444,#b91c1c);">
+          <div class="metric-num">85%</div>
+          <div class="metric-lbl">Functional Test Pass</div>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="metric-card" style="background:linear-gradient(135deg,#0d9488,#0f766e);">
+          <div class="metric-num">47</div>
+          <div class="metric-lbl">AWS Resources Created</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Architecture comparison -->
+    <h3 class="sub-title mb-3"><i class="bi bi-table me-2 text-primary-custom"></i>Architecture Comparison</h3>
+    <p class="text-muted mb-3 small">Three AWS compute architectures were provisioned and evaluated against five criteria:</p>
+    <div class="table-responsive mb-5">
+      <table class="table table-bordered align-middle small">
+        <thead class="table-dark">
+          <tr>
+            <th>Criterion</th>
+            <th><i class="bi bi-hdd me-1"></i>Lambda (Serverless)</th>
+            <th><i class="bi bi-boxes me-1"></i>ECS Fargate (Container)</th>
+            <th><i class="bi bi-layers me-1"></i>Elastic Beanstalk (Managed)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="fw-semibold">Cold-start latency</td>
+            <td class="text-warning fw-semibold">1,121 ms</td>
+            <td class="text-success fw-semibold">None (always warm)</td>
+            <td class="text-success fw-semibold">Minimal</td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Warm latency</td>
+            <td>1,147 ms avg</td>
+            <td>Lower (persistent container)</td>
+            <td>Similar to ECS</td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Scaling</td>
+            <td class="text-success">Instant, automatic</td>
+            <td>Target-tracking auto-scale</td>
+            <td>Managed, slower scale-out</td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Cost model</td>
+            <td class="text-success">Pay per invocation ($0.056/1K)</td>
+            <td>Pay per vCPU/memory per second</td>
+            <td>EC2 instance hours</td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Best use case</td>
+            <td>Sporadic, event-driven inference</td>
+            <td>High-throughput, sustained load</td>
+            <td>Simplified deployment, teams avoiding containers</td>
+          </tr>
+          <tr>
+            <td class="fw-semibold">Operational burden</td>
+            <td class="text-success">Minimal</td>
+            <td>Moderate</td>
+            <td>Moderate</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Critical discussion -->
+    <div class="row gy-4">
+      <div class="col-lg-6">
+        <div class="card p-4 h-100">
+          <h3 class="sub-title mb-3 text-success"><i class="bi bi-check-circle me-2"></i>System Strengths</h3>
+          <ul class="small text-muted mb-0 ps-3">
+            <li class="mb-2">Full Infrastructure-as-Code — entire environment reproducible in minutes with <code>terraform apply</code>.</li>
+            <li class="mb-2">Cloud-agnostic design — compute layer swappable without changing application code or API contract.</li>
+            <li class="mb-2">Defence-in-depth security — KMS encryption at rest, API key auth, least-privilege IAM, Secrets Manager.</li>
+            <li class="mb-2">Model lifecycle management — versioned S3 storage, DynamoDB metadata registry, upload/register scripts.</li>
+            <li class="mb-2">High classification accuracy — 94.56% on held-out test set with MobileNetV2 transfer learning.</li>
+            <li class="mb-2">Full reproducibility — all code, config, and scripts publicly available on GitHub.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card p-4 h-100">
+          <h3 class="sub-title mb-3 text-warning"><i class="bi bi-exclamation-triangle me-2"></i>Limitations &amp; Future Work</h3>
+          <ul class="small text-muted mb-0 ps-3">
+            <li class="mb-2">Lambda cold-start (~1.1s) is non-trivial for real-time clinical use; provisioned concurrency would mitigate this.</li>
+            <li class="mb-2">The system is AWS-specific at the provider level — true multi-cloud portability would require provider-abstraction modules for Azure/GCP.</li>
+            <li class="mb-2">85% functional test pass rate (not 100%) reflects edge cases where confusable tumour morphologies are misclassified.</li>
+            <li class="mb-2">No CI/CD pipeline — GitHub Actions would automate image build, push, and deployment on every commit.</li>
+            <li class="mb-2">No real-time model drift monitoring — adding CloudWatch metrics for per-class confidence distributions would detect data shift.</li>
+            <li class="mb-2">Elastic Beanstalk architecture was designed but performance not benchmarked in this iteration.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     DEPLOYED RESOURCES
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap" id="resources">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-server me-1"></i>Live Resources</span>
+    <h2 class="section-title">Deployed AWS Resource Inventory</h2>
+    <p class="text-muted mb-4">All resources are deployed in <strong>AWS us-east-1</strong> under account <code>069835412283</code>. The table below maps logical names to the actual provisioned values.</p>
+
+    <div class="table-responsive">
+      <table class="table table-striped table-sm resource-table align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>Resource</th>
+            <th>Type</th>
+            <th>Value / ARN / URL</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>api_gateway_url</td>
+            <td><span class="badge" style="background:#ea580c;">API Gateway</span></td>
+            <td>https://whaveg4pu8.execute-api.us-east-1.amazonaws.com/dev</td>
+          </tr>
+          <tr>
+            <td>predict_endpoint</td>
+            <td><span class="badge" style="background:#ea580c;">API Gateway</span></td>
+            <td>https://whaveg4pu8.execute-api.us-east-1.amazonaws.com/dev/predict</td>
+          </tr>
+          <tr>
+            <td>lambda_function_name</td>
+            <td><span class="badge bg-danger">Lambda</span></td>
+            <td>aaas-mri-dev-inference</td>
+          </tr>
+          <tr>
+            <td>lambda_ecr_repository_url</td>
+            <td><span class="badge" style="background:#b45309;">ECR</span></td>
+            <td>069835412283.dkr.ecr.us-east-1.amazonaws.com/aaas-mri-dev-lambda-inference</td>
+          </tr>
+          <tr>
+            <td>ecs_service_name</td>
+            <td><span class="badge" style="background:#d97706;">ECS Fargate</span></td>
+            <td>aaas-mri-dev-inference-service</td>
+          </tr>
+          <tr>
+            <td>ecs_ecr_repository_url</td>
+            <td><span class="badge" style="background:#b45309;">ECR</span></td>
+            <td>069835412283.dkr.ecr.us-east-1.amazonaws.com/aaas-mri-dev-ecs-inference</td>
+          </tr>
+          <tr>
+            <td>model_bucket_name</td>
+            <td><span class="badge bg-success">S3</span></td>
+            <td>aaas-mri-dev-models-12c3f89a</td>
+          </tr>
+          <tr>
+            <td>image_bucket_name</td>
+            <td><span class="badge bg-success">S3</span></td>
+            <td>aaas-mri-dev-images-12c3f89a</td>
+          </tr>
+          <tr>
+            <td>dynamodb_table_name</td>
+            <td><span class="badge bg-primary">DynamoDB</span></td>
+            <td>aaas-mri-dev-model-metadata</td>
+          </tr>
+          <tr>
+            <td>kms_key_id</td>
+            <td><span class="badge" style="background:#7c3aed;">KMS</span></td>
+            <td>010561d9-a0ed-4c4f-99b8-44f504393dd5</td>
+          </tr>
+          <tr>
+            <td>aws_region</td>
+            <td><span class="badge bg-dark">Global</span></td>
+            <td>us-east-1</td>
+          </tr>
+          <tr>
+            <td>aws_account_id</td>
+            <td><span class="badge bg-dark">Global</span></td>
+            <td>069835412283</td>
+          </tr>
+          <tr>
+            <td>github_repository</td>
+            <td><span class="badge" style="background:#1f2937;"><i class="bi bi-github me-1"></i>GitHub</span></td>
+            <td>https://github.com/Jyoti-dev123/thesis</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     WEB APP
+══════════════════════════════════════════════════════ -->
+<section class="section-wrap bg-white" id="webapp">
+  <div class="container">
+    <span class="section-label"><i class="bi bi-window me-1"></i>Web Application</span>
+    <h2 class="section-title">Flask Demo Web Application</h2>
+    <p class="text-muted mb-4" style="max-width:720px;">
+      A Flask-based web application (<code>webapp/</code>) was built for live demonstration and performance
+      evaluation. It acts as a frontend proxy: the browser uploads an image to Flask, which forwards it to the
+      Lambda API and returns the result to the UI with added metadata.
+    </p>
+    <div class="row gy-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="card p-4 h-100">
+          <div class="card-icon bg-primary-soft text-primary-custom mb-3"><i class="bi bi-upload"></i></div>
+          <h3 class="sub-title">Upload & Predict Page</h3>
+          <p class="small text-muted mb-0">
+            Drag-and-drop MRI image upload zone with a 16 MB file size limit. Displays colour-coded result card
+            with predicted class, tumour description, severity badge, and animated confidence progress bar.
+            Includes a 12-image sample gallery (3 per class) for quick one-click testing.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card p-4 h-100">
+          <div class="card-icon mb-3" style="background:#e0f2fe;color:#0284c7;"><i class="bi bi-speedometer"></i></div>
+          <h3 class="sub-title">Benchmark Page</h3>
+          <p class="small text-muted mb-0">
+            Interactive performance benchmark with a request-count slider (5–50). Sends N sequential requests
+            and displays cold-start, warm average, P50, P90, and estimated cost. Three Chart.js visualisations:
+            latency timeline, histogram distribution, and percentile curve. CSV export of raw data.
+          </p>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card p-4 h-100">
+          <div class="card-icon mb-3" style="background:#d1fae5;color:#059669;"><i class="bi bi-shield-check"></i></div>
+          <h3 class="sub-title">API Health Check</h3>
+          <p class="small text-muted mb-0">
+            Exposes <code>GET /api/health</code> for uptime monitoring. All routes served with 200 OK.
+            Environment-driven <code>API_URL</code> configuration allows the same webapp to point at
+            Lambda, ECS, or any other conforming backend without code changes.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider" />
+
+
+<!-- ══════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════ -->
+<footer class="py-5">
+  <div class="container">
+    <div class="row gy-3 align-items-center">
+      <div class="col-md-7">
+        <h5 class="mb-1 fw-bold" style="color:rgba(255,255,255,.9);">AaaS — Brain Tumor MRI Classification</h5>
+        <p class="mb-2 small">
+          <strong>Thesis:</strong> Design and Implementation of a Cloud-Agnostic 'Analytics as a Service' (AaaS) Pattern
+          for Medical Image Classification using Terraform
+        </p>
+        <p class="mb-0 small">
+          <strong>Author:</strong> Jyoti Jakhar &nbsp;·&nbsp;
+          <strong>Email:</strong> jyotijakhar24@gmail.com &nbsp;·&nbsp;
+          <strong>Date:</strong> March 2026
+        </p>
+      </div>
+      <div class="col-md-5 text-md-end">
+        <a href="https://github.com/Jyoti-dev123/thesis" target="_blank"
+           class="btn btn-outline-light btn-sm me-2 mb-2">
+          <i class="bi bi-github me-1"></i>GitHub Repository
+        </a>
+        <div class="mt-3 d-flex flex-wrap gap-2 justify-content-md-end">
+          <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">PyTorch 2.9.1</span>
+          <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">Terraform</span>
+          <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">AWS Lambda</span>
+          <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">ECS Fargate</span>
+          <span class="badge rounded-pill px-3 py-2" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);">MobileNetV2</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
