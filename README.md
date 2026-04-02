@@ -37,7 +37,7 @@ All infrastructure is declared as code in **9 modular Terraform configurations**
 | EC2 Inference Endpoint | `http://ec2-98-92-207-44.compute-1.amazonaws.com:8080/predict` |
 | Model S3 Bucket | `aaas-mri-dev-models-12c3f89a` |
 | Image S3 Bucket | `aaas-mri-dev-images-12c3f89a` |
-| DynamoDB Model Registry | `aaas-mri-dev-model-metadata` (hash: `model_name`, range: `version`) |
+| DynamoDB Model Registry | `aaas-mri-dev-model-metadata` (hash key: `model_name`) |
 | KMS Key ID | `010561d9-a0ed-4c4f-99b8-44f504393dd5` |
 
 ---
