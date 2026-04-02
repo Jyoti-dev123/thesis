@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Performance Benchmark — AaaS{% endblock %}
+{% block title %}Performance Benchmark — Cloud Design Patterns{% endblock %}
 
 {% block content %}
 
@@ -43,19 +43,50 @@
             </div>
           </div>
 
-          <!-- Test image preview -->
+          <!-- Test image selector -->
           <div class="mb-4">
-            <label class="form-label fw-semibold">Test Image</label>
-            <div class="d-flex align-items-center gap-3">
-              <img src="/sample-image/glioma/Te-gl_1.jpg"
+            <label class="form-label fw-semibold d-flex justify-content-between align-items-center">
+              Test Image
+              <button class="btn btn-outline-secondary btn-sm py-0 px-2" id="randomImgBtn" type="button">
+                <i class="fa-solid fa-shuffle me-1"></i>Random
+              </button>
+            </label>
+
+            <!-- Selected image preview -->
+            <div class="d-flex align-items-center gap-3 mb-2 p-2 rounded-2 border bg-light" id="selectedImgPreview">
+              <img id="selectedImgThumb"
+                   src="/sample-image/{{ samples.keys()|list|first }}/{{ samples.values()|list|first|first }}"
                    class="rounded-2 border"
-                   style="width:64px;height:64px;object-fit:cover"
-                   alt="test image">
+                   style="width:60px;height:60px;object-fit:cover" alt="test image">
               <div>
-                <div class="fw-semibold small">Te-gl_1.jpg</div>
-                <div class="small text-muted">Glioma test image</div>
-                <span class="badge bg-danger mt-1">Glioma</span>
+                <div class="fw-semibold small" id="selectedImgName">{{ samples.values()|list|first|first }}</div>
+                <div class="small text-muted" id="selectedImgClass">{{ classes_info[samples.keys()|list|first].label }} test image</div>
+                <span class="badge mt-1" id="selectedImgBadge"
+                      style="background:{{ classes_info[samples.keys()|list|first].hex_color }}">
+                  {{ classes_info[samples.keys()|list|first].label }}
+                </span>
               </div>
+            </div>
+
+            <!-- Class thumbnail grid -->
+            <div class="d-flex flex-wrap gap-2">
+              {% for cls, files in samples.items() %}
+              {% if files %}
+              {% for fname in files %}
+              <div class="bench-thumb {% if loop.first and loop.index0 == 0 and loop.revcount == loop.length %}active{% endif %}"
+                   data-cls="{{ cls }}"
+                   data-file="{{ fname }}"
+                   data-label="{{ classes_info[cls].label }}"
+                   data-color="{{ classes_info[cls].hex_color }}"
+                   title="{{ classes_info[cls].label }} — {{ fname }}"
+                   style="cursor:pointer;">
+                <img src="/sample-image/{{ cls }}/{{ fname }}"
+                     style="width:44px;height:44px;object-fit:cover;border-radius:6px;border:2px solid transparent;"
+                     alt="{{ cls }}" loading="lazy">
+              </div>
+              {% endfor %}
+              {% endif %}
+              {% endfor %}
             </div>
           </div>
 
@@ -273,6 +304,51 @@
 let latChartInst = null, distChartInst = null, pctChartInst = null;
 let lastData = null;
 
+// ── Selected image state ──────────────────────────────────────────────────
+let selectedCls  = null;
+let selectedFile = null;
+
+// Init: mark first thumb as active
+(function initThumbs() {
+  const thumbs = document.querySelectorAll('.bench-thumb');
+  if (!thumbs.length) return;
+  selectThumb(thumbs[0]);
+
+  thumbs.forEach(t => {
+    t.addEventListener('click', () => selectThumb(t));
+  });
+})();
+
+function selectThumb(el) {
+  document.querySelectorAll('.bench-thumb img').forEach(i => {
+    i.style.borderColor = 'transparent';
+    i.style.opacity = '0.7';
+  });
+  const img = el.querySelector('img');
+  img.style.borderColor = '#0d6efd';
+  img.style.opacity = '1';
+
+  selectedCls  = el.dataset.cls;
+  selectedFile = el.dataset.file;
+  const label  = el.dataset.label;
+  const color  = el.dataset.color;
+
+  document.getElementById('selectedImgThumb').src = img.src;
+  document.getElementById('selectedImgName').textContent  = selectedFile;
+  document.getElementById('selectedImgClass').textContent = label + ' test image';
+  const badge = document.getElementById('selectedImgBadge');
+  badge.textContent = label;
+  badge.style.background = color;
+}
+
+// ── Random button ─────────────────────────────────────────────────────────
+document.getElementById('randomImgBtn').addEventListener('click', function () {
+  const thumbs = Array.from(document.querySelectorAll('.bench-thumb'));
+  if (!thumbs.length) return;
+  const pick = thumbs[Math.floor(Math.random() * thumbs.length)];
+  selectThumb(pick);
+});
+
 // ── Slider label ──────────────────────────────────────────────────────────
 document.getElementById('numRequests').addEventListener('input', function () {
   document.getElementById('numRequestsLabel').textContent = this.value;
@@ -292,11 +368,17 @@ async function runBenchmark() {
     const resp = await fetch('/api/benchmark', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ requests: n })
+      body: JSON.stringify({ requests: n, image_class: selectedCls, image_file: selectedFile })
     });
     if (!resp.ok) throw new Error('Server error ' + resp.status);
     const data = await resp.json();
     lastData = data;
+    // Update preview to reflect the image actually used
+    if (data.test_image) {
+      const src = `/sample-image/${data.test_image.cls}/${data.test_image.file}`;
+      document.getElementById('selectedImgThumb').src = src;
+      document.getElementById('selectedImgName').textContent = data.test_image.file;
+    }
     renderResults(data);
     setSection('results');
   } catch (err) {
