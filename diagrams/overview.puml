@@ -1,4 +1,4 @@
-@startuml overview
+﻿@startuml overview
 !theme plain
 skinparam backgroundColor #F4F6FB
 skinparam defaultFontName "Segoe UI"
@@ -21,7 +21,7 @@ skinparam actor {
   BackgroundColor #EBF4FF
 }
 
-title <size:22><b>AaaS — Brain Tumor MRI Classification</b></size>\n<size:14><color:#718096>Cloud-Agnostic Analytics as a Service | AWS + Terraform</color></size>
+title <size:22><b>Cloud-Agnostic Design Patterns — Brain Tumor MRI Classification</b></size>\n<size:15><color:#2D3748><b>MSc Thesis:</b> Design and Implementation of a Cloud-Agnostic Analytics as a Service Pattern</color></size>\n<size:13><color:#718096>AWS + Terraform IaC · Containerised with Docker · PyTorch MobileNetV2</color></size>
 
 ' ─────────────────────────────────────────────────────
 '  CLIENT LAYER
@@ -37,27 +37,28 @@ rectangle "  <b>Client Layer</b>  " as CLIENT_LAYER #EBF8FF/D6EAF8 {
 rectangle "  ☁  <b>AWS Cloud</b>  (us-east-1)  " as AWS #FFF8F0/FDEBD0 {
 
   ' API GATEWAY
-  component "<color:#FF6B00><b>⚡ API Gateway</b></color>\n<size:10>REST API — /predict\nHTTPS · API Key Auth</size>" as APIGW #FFDDB3
+  component "<color:#FF6B00><b>⚡ API Gateway</b></color>\n<size:10>POST /predict\nGET /models · POST /models\nGET /models/{name}\nDELETE /models/{name}/{ver}\nHTTPS · API Key Auth</size>" as APIGW #FFDDB3
 
-  ' COMPUTE — two backends
+  ' COMPUTE — three backends
   rectangle "  <b>Compute</b>  " as COMPUTE #FFF0F0/FFD5D5 {
-    component "<color:#E53E3E><b>λ AWS Lambda</b></color>\n<size:10>PyTorch MobileNetV2\nContainer Image · 3008 MB</size>" as LAMBDA #FFB3B3
-    component "<color:#C05621><b>⬡ ECS Fargate</b></color>\n<size:10>Flask Inference Service\nContainer · Auto-scaling</size>" as ECS #FDD9C0
+    component "<color:#E53E3E><b>λ AWS Lambda</b></color>\n<size:10>PyTorch MobileNetV2\n<b>Docker</b> Container Image · 3008 MB</size>" as LAMBDA #FFB3B3
+    component "<color:#C05621><b>⬡ ECS Fargate</b></color>\n<size:10>Flask Inference Service\n<b>Docker</b> · Auto-scaling</size>" as ECS #FDD9C0
+    component "<color:#276749><b>🖥  EC2 (AL2023)</b></color>\n<size:10>t3.medium · Port 8080\nDocker Inference App\n98.92.207.44</size>" as EC2 #C6F6D5
   }
 
   ' CONTAINER REGISTRY
-  component "<color:#D97706><b>📦 ECR</b></color>\n<size:10>Lambda Image\nECS Image</size>" as ECR #FDE68A
+  component "<color:#D97706><b>📦 ECR</b></color>\n<size:10><b>Docker</b> Image Registry\nLambda Image\nECS Image</size>" as ECR #FDE68A
 
   ' STORAGE
   rectangle "  <b>Storage</b>  " as STORAGE #F0FFF4/C6F6D5 {
     component "<color:#276749><b>🗄  S3 — Models</b></color>\n<size:10>brain_tumor_model.pt\nbrain_tumor_model.onnx</size>" as S3_MODEL #9AE6B4
     component "<color:#276749><b>🗄  S3 — Images</b></color>\n<size:10>Uploaded MRI scans\nTemporary storage</size>" as S3_IMG #9AE6B4
-    component "<color:#2B6CB0><b>⬡ DynamoDB</b></color>\n<size:10>Model Metadata\nname · path · version</size>" as DYNAMO #BEE3F8
+    component "<color:#2B6CB0><b>⬡ DynamoDB</b></color>\n<size:10>Model Metadata\nHash: model_name\nRange: version\nname · path · version</size>" as DYNAMO #BEE3F8
   }
 
   ' SECURITY
   rectangle "  <b>Security</b>  " as SECURITY #FAF5FF/E9D8FD {
-    component "<color:#6B46C1><b>🔑 IAM Roles</b></color>\n<size:10>Lambda · ECS · API GW\nLeast-privilege policies</size>" as IAM #D6BCFA
+    component "<color:#6B46C1><b>🔑 IAM Roles</b></color>\n<size:10>Lambda · ECS · EC2 · API GW\nLeast-privilege policies</size>" as IAM #D6BCFA
     component "<color:#553C9A><b>🔐 KMS</b></color>\n<size:10>Encryption at rest\nS3 · DynamoDB · Logs</size>" as KMS #D6BCFA
     component "<color:#44337A><b>🛡  Secrets Manager</b></color>\n<size:10>API Keys · Secrets\nRotation support</size>" as SECRETS #D6BCFA
   }
@@ -67,7 +68,7 @@ rectangle "  ☁  <b>AWS Cloud</b>  (us-east-1)  " as AWS #FFF8F0/FDEBD0 {
 '  IaC LAYER
 ' ─────────────────────────────────────────────────────
 rectangle "  <b>Infrastructure as Code</b>  " as IAC #F0F9FF/CFFAFE {
-  component "<color:#0891B2><b>⬛ Terraform</b></color>\n<size:10>8 Modular Configs\nAPI GW · Lambda · ECS\nS3 · DynamoDB · IAM\nECR · Security</size>" as TF #A5F3FC
+  component "<color:#0891B2><b>\u2b1b Terraform</b></color>\n<size:10>9 Modular Configs\nAPI GW · Lambda · ECS · EC2\nS3 · DynamoDB · IAM\nECR · Security\n<b>Docker</b>-based compute</size>" as TF #A5F3FC
 }
 
 ' ─────────────────────────────────────────────────────
@@ -76,9 +77,8 @@ rectangle "  <b>Infrastructure as Code</b>  " as IAC #F0F9FF/CFFAFE {
 USER       --> WEBAPP    : <size:11>Upload MRI\nJSON + Image</size>
 WEBAPP     --> APIGW     : <size:11><b>POST /predict</b>\nmultipart/form-data</size>
 APIGW      --> LAMBDA    : <size:11>Invoke\n(primary)</size> #E53E3E
-APIGW      -[hidden]-> ECS
 APIGW      --> ECS       : <size:11>Route\n(fallback)</size> #C05621
-
+APIGW      --> EC2       : <size:11>Route\n(alternative)</size> #276749
 LAMBDA     --> S3_MODEL  : <size:11>Download\nmodel on\ncold start</size>
 LAMBDA     --> DYNAMO    : <size:11>Lookup model\npath</size>
 LAMBDA     --> S3_IMG    : <size:11>Store\nimage</size>
@@ -86,8 +86,12 @@ LAMBDA     --> S3_IMG    : <size:11>Store\nimage</size>
 ECS        --> S3_MODEL  : <size:11>Load model</size>
 ECS        --> DYNAMO    : <size:11>Lookup path</size>
 
+EC2        --> S3_MODEL  : <size:11>Load model</size>
+EC2        --> DYNAMO    : <size:11>Lookup path</size>
+
 ECR        ..> LAMBDA    : <size:10>pulls image</size> #888888
 ECR        ..> ECS       : <size:10>pulls image</size> #888888
+ECR        ..> EC2       : <size:10>pulls image</size> #888888
 
 SECURITY   ..> COMPUTE   : <size:10>IAM·KMS\nprotect</size> #7C3AED
 SECURITY   ..> STORAGE   : <size:10>encrypt\nat rest</size> #7C3AED
@@ -104,10 +108,13 @@ legend bottom right
   |= Symbol |= Meaning |
   | ──► | Primary data flow |
   | ····► | Infrastructure dependency |
-  | <back:#FFB3B3>  </back> | Serverless compute |
+  | <back:#FFB3B3>  </back> | Serverless (Lambda) |
+  | <back:#FDD9C0>  </back> | Container (ECS) |
+  | <back:#C6F6D5>  </back> | VM compute (EC2) |
   | <back:#9AE6B4>  </back> | Storage services |
   | <back:#D6BCFA>  </back> | Security layer |
   | <back:#A5F3FC>  </back> | Infrastructure as Code |
+  | <back:#FDE68A>  </back> | Docker / ECR |
 end legend
 
 @enduml
