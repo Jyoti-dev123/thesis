@@ -285,3 +285,16 @@ body {
 ::-webkit-scrollbar-track { background: #f1f3f9; }
 ::-webkit-scrollbar-thumb { background: #c5cfe0; border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: #a0b0c8; }
+
+
+/* -- Benchmark image selector thumbs ------------------------------------ */
+.bench-thumb {
+  display: inline-block;
+  border-radius: 8px;
+  transition: transform .15s, opacity .15s;
+}
+.bench-thumb:hover img {
+  border-color: #6ea8fe !important;
+  opacity: 1 !important;
+  transform: scale(1.08);
+}
