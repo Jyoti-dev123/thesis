@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Brain Tumor MRI Classification{% endblock %}</title>
+  <title>{% block title %}Cloud Design Patterns — Brain Tumor MRI{% endblock %}</title>
 
   <!-- Inline SVG favicon (avoids 404) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>">
@@ -23,7 +23,7 @@
   <div class="container">
     <a class="navbar-brand d-flex align-items-center gap-2" href="/">
       <i class="fa-solid fa-brain text-primary"></i>
-      <span><strong>AaaS</strong> &mdash; Brain Tumor MRI</span>
+      <span><strong>Cloud Design Patterns</strong> &mdash; Brain Tumor MRI</span>
     </a>
     <button class="navbar-toggler border-0" type="button"
             data-bs-toggle="collapse" data-bs-target="#mainNav">
@@ -41,6 +41,12 @@
           <a class="nav-link rounded px-3 {% if request.endpoint == 'benchmark' %}active{% endif %}"
              href="/benchmark">
             <i class="fa-solid fa-gauge-high me-1"></i> Benchmark
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link rounded px-3 {% if request.endpoint == 'about' %}active{% endif %}"
+             href="/about">
+            <i class="fa-solid fa-circle-info me-1"></i> About
           </a>
         </li>
         <li class="nav-item ms-2">
@@ -63,7 +69,7 @@
       <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
         <small class="opacity-75">
           <i class="fa-solid fa-brain me-1 text-primary"></i>
-          <strong>Analytics as a Service</strong> &mdash; Cloud-Agnostic Medical Image Classification
+          <strong>Cloud-Agnostic Design Patterns</strong> &mdash; Analytics as a Service for Medical Imaging
         </small>
       </div>
       <div class="col-md-6 text-center text-md-end">
