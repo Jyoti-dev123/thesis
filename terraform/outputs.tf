@@ -47,3 +47,26 @@ output "kms_key_id" {
   description = "KMS key ID used for encryption"
   value       = module.security.kms_key_id
 }
+
+# ---------------------------------------------------------------
+# EC2 compute tier
+# ---------------------------------------------------------------
+output "ec2_instance_id" {
+  description = "EC2 inference instance ID"
+  value       = module.ec2.instance_id
+}
+
+output "ec2_public_ip" {
+  description = "Public IP of the EC2 inference instance"
+  value       = module.ec2.public_ip
+}
+
+output "ec2_inference_url" {
+  description = "Direct /predict endpoint on the EC2 instance"
+  value       = module.ec2.inference_url
+}
+
+output "ec2_models_url" {
+  description = "Direct /models management endpoint on the EC2 instance"
+  value       = module.ec2.models_url
+}
