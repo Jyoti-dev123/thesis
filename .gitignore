@@ -45,3 +45,29 @@ Thumbs.db
 *_accessKeys.csv
 login-details.txt
 details.txt
+
+# Project notes / internal docs — not for public repo
+agents.md
+pr.txt
+methodology.txt
+Methodology.docx
+suggestions-by-professor.txt
+topic.txt
+
+# Terraform plan binary
+terraform/tfplan
+
+# PlantUML rendered output (PNGs are served from webapp/static/img/ instead)
+out/
+
+# ONNX external data file
+model/*.data
+
+AdminUser_accessKeys.csv
+AdminUser_credentials.csv
+agents.md
+details.txt
+login-details.txt
+Methodology.docx
+methodology.txt
+pr.txt
