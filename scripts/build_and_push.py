@@ -4,11 +4,16 @@ Build Docker container images and push them to Amazon ECR.
 Builds:
   1. Lambda inference image  → ECR lambda repository
   2. ECS inference image     → ECR ecs repository
+  3. EC2  inference image    → same ECR ecs repository (re-tagged :ec2)
+
+The EC2 deployment reuses the ECS image (both backend/ecs/app.py).
+Pushing a fresh tag and running `systemctl restart aaas-inference` on
+the instance is all that is needed to deploy a new version to EC2.
 
 Usage:
     python scripts/build_and_push.py \
         --lambda-repo <lambda_ecr_url> \
-        --ecs-repo    <ecs_ecr_url> \
+        --ecs-repo    <ecs_ecr_url>    \
         --region      us-east-1
 
 Get repo URLs from Terraform:
@@ -100,17 +105,27 @@ def main():
     print("\n[2/3] Building and pushing Lambda inference image...")
     build_and_push(LAMBDA_CONTEXT, args.lambda_repo, args.tag)
 
-    # Build and push ECS image
-    print("\n[3/3] Building and pushing ECS inference image...")
+    # Build and push ECS image — also used by EC2 (same Dockerfile)
+    print("\n[3/3] Building and pushing ECS/EC2 inference image...")
     build_and_push(ECS_CONTEXT, args.ecs_repo, args.tag)
+    # Tag the same image as :ec2 so the EC2 instance can pull it explicitly
+    ec2_tag = f"{args.ecs_repo}:ec2"
+    run(f"docker tag {args.ecs_repo}:{args.tag} {ec2_tag}")
+    run(f"docker push {ec2_tag}")
 
     print("\n" + "=" * 60)
     print("All images pushed successfully.")
     print("=" * 60)
-    print(f"\nLambda image: {args.lambda_repo}:{args.tag}")
-    print(f"ECS image:    {args.ecs_repo}:{args.tag}")
+    print(f"\nLambda image:  {args.lambda_repo}:{args.tag}")
+    print(f"ECS image:     {args.ecs_repo}:{args.tag}")
+    print(f"EC2 image:     {ec2_tag}  (same as ECS, re-tagged)")
     print(
-        "\nNOTE: Update the Lambda function to use the new image:\n"
+        "\nTo deploy the new image to EC2, SSH in and run:\n"
+        "  sudo systemctl restart aaas-inference\n"
+        "(The systemd unit will pull the latest :ec2 image automatically.)"
+    )
+    print(
+        "\nTo update the Lambda function:\n"
         f"  aws lambda update-function-code \\\n"
         f"    --function-name <lambda_function_name> \\\n"
         f"    --image-uri {args.lambda_repo}:{args.tag}"
