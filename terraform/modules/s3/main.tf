@@ -73,6 +73,8 @@ resource "aws_s3_bucket_lifecycle_configuration" "model_lifecycle" {
     id     = "archive-old-models"
     status = "Enabled"
 
+    filter {}
+
     noncurrent_version_transition {
       noncurrent_days = 90
       storage_class   = "GLACIER"
